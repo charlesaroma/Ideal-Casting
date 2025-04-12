@@ -1,0 +1,92 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;700&family=Montserrat:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+/* Font Families */
+.h1, .h2, .h3 {
+  font-family: 'Roboto Slab', serif; /* For headings */
+  font-weight: 700;
+}
+
+body, p, span, a {
+  font-family: 'Montserrat', sans-serif; /* For body text */
+  font-weight: 400;
+}
+
+/* Specific weights for emphasis */
+strong, b {
+  font-weight: 600;
+}
+
+em, i {
+  font-style: italic;
+}
+
+/* Container Classes */
+.container-custom {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+  .container-custom {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-custom {
+    padding-left: 2rem;
+    padding-right: 2rem;
+    max-width: 1280px;
+  }
+}
+
+/* Custom Theme Extensions */
+@layer base {
+  :root {
+    /* Primary color: #840227 (Ideal Casting Logo Color) */
+    --color-primary-50: #f9e6e9;
+    --color-primary-100: #e397a0;
+    --color-primary-200: #d66e78;
+    --color-primary-300: #c94550;
+    --color-primary-400: #bc1c28;
+    --color-primary-500: #840227; /* Base shade (your logo color) */
+    --color-primary-600: #6a021e;
+    --color-primary-700: #500115;
+    --color-primary-800: #36010d;
+    --color-primary-900: #1c0006;
+
+    /* Secondary color: Deep Navy Blue for a professional, sophisticated feel */
+    --color-secondary-50: #f0f4f9;
+    --color-secondary-100: #e0e8f2;
+    --color-secondary-200: #b3c6e0;
+    --color-secondary-300: #86a4ce;
+    --color-secondary-400: #5982bc;
+    --color-secondary-500: #2c60aa; /* Base shade - a deep, rich navy blue */
+    --color-secondary-600: #234d88;
+    --color-secondary-700: #1a3a66;
+    --color-secondary-800: #112744;
+    --color-secondary-900: #081422;
+
+    /* Accent color: Modern grays for a clean, minimalist look */
+    --color-accent-50: #fafafa;
+    --color-accent-100: #f3f4f6;
+    --color-accent-200: #e5e7eb;
+    --color-accent-300: #d1d5db;
+    --color-accent-400: #9ca3af;
+    --color-accent-500: #6b7280; /* Base accent gray */
+    --color-accent-600: #4b5563;
+    --color-accent-700: #374151;
+    --color-accent-800: #1f2937;
+    --color-accent-900: #111827;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 80px; /* Adjust this value based on your navbar height */
+  }
+}

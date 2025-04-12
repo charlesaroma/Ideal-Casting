@@ -1,0 +1,132 @@
+export const talents = [
+  {
+    talentId: "ICT-ACT-001",
+    name: "John K.",
+    primaryRole: "Actor",
+    gender: "Male",
+    age: 28,
+    location: "Kampala",
+    experience: "6",
+    availability: "Available",
+    rating: 4.8,
+    skills: ["Acting", "Voice", "Improv", "Theatre"],
+    profileImage: "https://images.unsplash.com/photo-1522529599102-193c0d76b5b6"
+  },
+  {
+    talentId: "ICT-MOD-002",
+    name: "Sarah N.",
+    primaryRole: "Model",
+    gender: "Female",
+    age: 24,
+    location: "Entebbe",
+    experience: "3",
+    availability: "Busy",
+    rating: 4.9,
+    skills: ["Modeling", "Runway", "Commercial", "Photography"],
+    profileImage: "https://images.unsplash.com/photo-1534528741775-53994a69daeb"
+  },
+  {
+    talentId: "ICT-DNC-003",
+    name: "David M.",
+    primaryRole: "Dancer",
+    gender: "Male",
+    age: 22,
+    location: "Kampala",
+    experience: "4",
+    availability: "Available",
+    rating: 4.7,
+    skills: ["Dance", "Traditional", "Contemporary", "Choreography"],
+    profileImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d"
+  },
+  {
+    talentId: "ICT-SNG-004",
+    name: "Grace A.",
+    primaryRole: "Singer",
+    gender: "Female",
+    age: 26,
+    location: "Jinja",
+    experience: "7",
+    availability: "Available",
+    rating: 5.0,
+    skills: ["Singing", "Voice", "Traditional", "Luganda"],
+    profileImage: "https://images.unsplash.com/photo-1567532900872-f4e906cbf06a"
+  },
+  {
+    talentId: "ICT-HST-005",
+    name: "Mark O.",
+    primaryRole: "Host",
+    gender: "Male",
+    age: 32,
+    location: "Kampala",
+    experience: "10",
+    availability: "Busy",
+    rating: 4.9,
+    skills: ["Hosting", "Voice", "Improv", "Swahili"],
+    profileImage: "https://images.unsplash.com/photo-1633332755192-727a05c4013d"
+  },
+  {
+    talentId: "ICT-MOD-006",
+    name: "Lisa K.",
+    primaryRole: "Model",
+    gender: "Female",
+    age: 23,
+    location: "Entebbe",
+    experience: "2",
+    availability: "Available",
+    rating: 4.6,
+    skills: ["Modeling", "Commercial", "Acting", "Photography"],
+    profileImage: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e"
+  },
+  {
+    talentId: "ICT-ACT-007",
+    name: "Peter N.",
+    primaryRole: "Actor",
+    gender: "Male",
+    age: 35,
+    location: "Kampala",
+    experience: "12",
+    availability: "Available",
+    rating: 4.9,
+    skills: ["Acting", "Voice", "Theatre", "Stunts"],
+    profileImage: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d"
+  },
+  {
+    talentId: "ICT-DNC-008",
+    name: "Mary W.",
+    primaryRole: "Dancer",
+    gender: "Female",
+    age: 20,
+    location: "Jinja",
+    experience: "3",
+    availability: "Available",
+    rating: 4.7,
+    skills: ["Dance", "Traditional", "Theatre"],
+    profileImage: "https://images.unsplash.com/photo-1534528741775-53994a69daeb"
+  }
+];
+
+export const talentCategories = [
+  'Actor',
+  'Model',
+  'Dancer',
+  'Singer',
+  'Host',
+  'Extra',
+];
+
+export const skillsList = [
+  'Dance',
+  'Acting',
+  'Modeling',
+  'Singing',
+  'Hosting',
+  'Stunts',
+  'Voice',
+  'Improv',
+  'Runway',
+  'Commercial',
+  'Theatre',
+  'Traditional',
+  'Luganda',
+  'Swahili',
+]; 
