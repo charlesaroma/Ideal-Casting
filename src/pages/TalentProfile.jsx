@@ -48,9 +48,9 @@ export default function TalentProfile() {
         {/* Hero Section */}
         <div className="relative rounded-2xl overflow-hidden bg-[var(--color-accent-900)] mb-8">
           <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-primary-500)]/20 to-[var(--color-accent-900)]/20" />
-          <div className="relative z-10 p-8 md:p-12 flex flex-col md:flex-row gap-8 items-center">
+          <div className="relative z-10 p-6 sm:p-8 md:p-12 flex flex-col md:flex-row gap-6 md:gap-8 items-center">
             {/* Profile Image */}
-            <div className="w-48 h-48 rounded-full overflow-hidden border-4 border-[var(--color-accent-200)] shadow-xl">
+            <div className="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-[var(--color-accent-200)] shadow-xl flex-shrink-0">
               <img
                 src={talent.profileImage}
                 alt={talent.name}
@@ -60,32 +60,32 @@ export default function TalentProfile() {
 
             {/* Basic Info */}
             <div className="text-center md:text-left text-white flex-1">
-              <div className="flex items-center gap-3 justify-center md:justify-start">
-                <h1 className="text-3xl md:text-4xl font-bold">{talent.talentId}</h1>
+              <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 justify-center md:justify-start">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">{talent.talentId}</h1>
                 <span className="px-3 py-1 bg-[var(--color-primary-500)]/20 text-[var(--color-primary-300)] rounded-full text-sm">
                   {talent.availability}
                 </span>
               </div>
-              <p className="text-xl text-[var(--color-accent-200)] mt-2">{talent.primaryRole}</p>
-              <div className="flex items-center gap-4 mt-4 justify-center md:justify-start">
+              <p className="text-lg sm:text-xl text-[var(--color-accent-200)] mt-2">{talent.primaryRole}</p>
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4 mt-4 justify-center md:justify-start">
                 <div className="flex items-center gap-2">
-                  <Icon icon="mdi:map-marker" className="w-5 h-5 text-[var(--color-accent-300)]" />
-                  <span className="text-[var(--color-accent-200)]">{talent.location}</span>
+                  <Icon icon="mdi:map-marker" className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--color-accent-300)]" />
+                  <span className="text-sm sm:text-base text-[var(--color-accent-200)]">{talent.location}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Icon icon="mdi:clock-outline" className="w-5 h-5 text-[var(--color-accent-300)]" />
-                  <span className="text-[var(--color-accent-200)]">{talent.experience} years exp.</span>
+                  <Icon icon="mdi:clock-outline" className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--color-accent-300)]" />
+                  <span className="text-sm sm:text-base text-[var(--color-accent-200)]">{talent.experience} years exp.</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Icon icon="mdi:star" className="w-5 h-5 text-yellow-400" />
-                  <span className="text-[var(--color-accent-200)]">{talent.rating}</span>
+                  <Icon icon="mdi:star" className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" />
+                  <span className="text-sm sm:text-base text-[var(--color-accent-200)]">{talent.rating}</span>
                 </div>
               </div>
             </div>
 
             {/* Book Now Button */}
-            <div>
-              <button className="px-6 py-3 bg-[var(--color-primary-500)] text-white rounded-lg hover:bg-[var(--color-primary-600)] transition-colors duration-200 flex items-center gap-2">
+            <div className="w-full sm:w-auto mt-4 md:mt-0">
+              <button className="w-full sm:w-auto px-6 py-3 bg-[var(--color-primary-500)] text-white rounded-lg hover:bg-[var(--color-primary-600)] transition-colors duration-200 flex items-center gap-2 justify-center">
                 <Icon icon="mdi:calendar-plus" className="w-5 h-5" />
                 Book Through Agency
               </button>
@@ -95,13 +95,13 @@ export default function TalentProfile() {
 
         {/* Content Tabs */}
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-          <div className="border-b border-[var(--color-accent-200)]">
-            <div className="flex">
+          <div className="border-b border-[var(--color-accent-200)] overflow-x-auto">
+            <div className="flex min-w-max">
               {['about', 'headshots', 'monologue', 'skills'].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`px-6 py-4 text-sm font-medium transition-colors duration-200 cursor-pointer ${
+                  className={`px-4 sm:px-6 py-4 text-sm font-medium transition-colors duration-200 cursor-pointer whitespace-nowrap ${
                     activeTab === tab
                       ? 'text-[var(--color-primary-500)] border-b-2 border-[var(--color-primary-500)]'
                       : 'text-[var(--color-accent-600)] hover:text-[var(--color-accent-900)]'
@@ -114,7 +114,7 @@ export default function TalentProfile() {
           </div>
 
           {/* Tab Content */}
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             {activeTab === 'about' && (
               <div className="max-w-3xl">
                 <p className="text-[var(--color-accent-700)] leading-relaxed">{profile.bio}</p>
