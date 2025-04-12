@@ -246,14 +246,14 @@ const Home = () => {
               {/* Content */}
               <div className="text-center mb-12">
                 <h2 className="h2 text-3xl sm:text-4xl md:text-5xl font-bold text-[var(--color-accent-200)] mb-6 leading-tight">
-                  Ready to Discover Your Next
+                  Ready to Find Your Next Super
                   <span className="relative inline-block px-2 mx-2">
                     <span className="relative z-10">Star</span>
                     <div className="absolute inset-0 transform -skew-x-12">
                       <div className="absolute inset-0 bg-[var(--color-primary-500)]"></div>
                     </div>
                   </span>
-                  Talent?
+                
                 </h2>
                 <p className="text-base sm:text-lg text-[var(--color-accent-200)]/80 max-w-2xl mx-auto mb-12 leading-relaxed">
                   Join Uganda's premier casting network. Whether you're seeking talent or looking to showcase your abilities,
@@ -273,16 +273,7 @@ const Home = () => {
                     </span>
                   </Link>
                   
-                  <Link
-                    to="/talent-directory"
-                    className="group inline-flex items-center gap-2 text-[var(--color-accent-200)] font-semibold hover:text-[var(--color-accent-100)] transition-colors duration-300"
-                  >
-                    Browse Talent Directory
-                    <Icon 
-                      icon="mdi:arrow-right" 
-                      className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" 
-                    />
-                  </Link>
+                  
                 </div>
               </div>
 

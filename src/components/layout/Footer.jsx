@@ -56,7 +56,7 @@ const Footer = () => {
             <div className="text-center lg:text-left max-w-xl">
               <h2 className="text-3xl sm:text-4xl font-bold mb-4">
                 <span className="text-[var(--color-accent-200)]">Join Our</span>
-                <span className="text-[var(--color-primary-500)] ml-2">Creative Network</span>
+                <span className="text-[var(--color-primary-400)] ml-2">Creative Network</span>
               </h2>
               <p className="text-[var(--color-accent-400)] text-lg">
                 Stay updated with casting calls, industry news, and exclusive opportunities.
@@ -76,7 +76,7 @@ const Footer = () => {
                   <span className="absolute inset-0 bg-gradient-to-r from-[var(--color-primary-600)] to-[var(--color-primary-400)] transition-transform duration-300 ease-out translate-x-full group-hover:translate-x-0"></span>
                   <span className="relative flex px-6 items-center gap-2">
                     Subscribe
-                    <Icon icon="mdi:arrow-right" className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />
+                    
                   </span>
                 </button>
               </form>
@@ -92,7 +92,7 @@ const Footer = () => {
             {/* Brand Section */}
             <div className="lg:col-span-4">
               <Link to="/" className="inline-block mb-6">
-                <img src="/ideal.png" alt="Ideal Casting" className="h-12 w-auto" />
+                <img src="/ideal2.png" alt="Ideal Casting" className="h-12 w-auto" />
               </Link>
               <p className="text-[var(--color-accent-400)] mb-8 text-lg">
                 Connecting Exceptional Talent with Extraordinary Opportunities in Uganda's Entertainment Industry
