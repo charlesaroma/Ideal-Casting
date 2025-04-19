@@ -5,8 +5,21 @@ import { Icon } from '@iconify/react';
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
-  const location = useLocation();
   const [dropdownTimeout, setDropdownTimeout] = useState(null);
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem('user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
+  
+  const location = useLocation();
+
+  // Effect to handle user state
+  useEffect(() => {
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+  }, []);
 
   const socialLinks = [
     { icon: 'mdi:instagram', url: 'https://instagram.com', label: 'Instagram' },
@@ -21,7 +34,7 @@ const Navbar = () => {
     {
       label: 'About',
       items: [
-    { path: '/about', label: 'About Us' },
+        { path: '/about', label: 'About Us' },
         { path: '/team', label: 'Our Team' },
         { path: '/careers', label: 'Careers' },
       ],
@@ -30,8 +43,8 @@ const Navbar = () => {
     {
       label: 'Talent',
       items: [
-    { path: '/talent-showcase', label: 'Talent Showcase' },
-    { path: '/talent-directory', label: 'Talent Directory' },
+        { path: '/talent-showcase', label: 'Talent Showcase' },
+        { path: '/talent-directory', label: 'Talent Directory' },
       ],
     },
     { path: '/contact', label: 'Contact' },
@@ -50,11 +63,10 @@ const Navbar = () => {
   const handleDropdownLeave = useCallback(() => {
     const timeout = setTimeout(() => {
       setActiveDropdown(null);
-    }, 300); // 300ms delay before closing
+    }, 300);
     setDropdownTimeout(timeout);
   }, []);
 
-  // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
       if (dropdownTimeout) {
@@ -63,8 +75,14 @@ const Navbar = () => {
     };
   }, [dropdownTimeout]);
 
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    setUser(null);
+    window.location.href = '/';
+  };
+
   return (
-    <nav className="fixed w-full bg-white shadow-md z-50">
+    <nav className="fixed w-full bg-[var(--color-accent-50)] shadow-md z-50">
       <div className="container-custom">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -105,7 +123,7 @@ const Navbar = () => {
                       />
                     </button>
                     <div 
-                      className={`absolute top-full left-0 mt-1 py-2 w-48 bg-white rounded-lg shadow-lg transition-all duration-300 ${
+                      className={`absolute top-full left-0 mt-1 py-2 w-48 bg-[var(--color-accent-50)] rounded-lg shadow-lg transition-all duration-300 ${
                         activeDropdown === item.label 
                           ? 'opacity-100 visible translate-y-0' 
                           : 'opacity-0 invisible -translate-y-2'
@@ -127,9 +145,9 @@ const Navbar = () => {
                     </div>
                   </>
                 ) : (
-              <Link
+                  <Link
                     to={item.path}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
+                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
                       isActive(item.path)
                         ? 'text-[var(--color-primary-500)] bg-[var(--color-primary-50)]'
                         : 'text-[var(--color-accent-600)] hover:text-[var(--color-primary-500)] hover:bg-[var(--color-primary-50)]'
@@ -140,6 +158,34 @@ const Navbar = () => {
                 )}
               </div>
             ))}
+
+            {/* Auth Section - Desktop */}
+            {user ? (
+              <div className="flex items-center ml-4">
+                <span className="text-[var(--color-accent-600)] mr-3">Welcome, {user.name}</span>
+                <button
+                  onClick={handleLogout}
+                  className="text-sm text-[var(--color-primary-500)] hover:text-[var(--color-primary-600)]"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center ml-4">
+                <Link
+                  to="/login"
+                  className="text-sm text-[var(--color-primary-500)] hover:text-[var(--color-primary-600)] mr-4"
+                >
+                  Login
+                </Link>
+                <Link
+                  to="/signup"
+                  className="text-sm bg-[var(--color-primary-500)] text-[var(--color-accent-50)] px-4 py-2 rounded-md hover:bg-[var(--color-primary-600)] transition-colors duration-200"
+                >
+                  Sign Up
+                </Link>
+              </div>
+            )}
           </div>
 
           {/* Social Media Links - Desktop */}
@@ -175,7 +221,7 @@ const Navbar = () => {
 
       {/* Mobile Navigation */}
       {isOpen && (
-        <div className="md:hidden bg-white border-t border-[var(--color-accent-200)]">
+        <div className="md:hidden bg-[var(--color-accent-50)] border-t border-[var(--color-accent-200)]">
           <div className="container-custom py-2 space-y-1">
             {navStructure.map((item) => (
               <div key={item.label}>
@@ -217,20 +263,50 @@ const Navbar = () => {
                     )}
                   </div>
                 ) : (
-              <Link
+                  <Link
                     to={item.path}
                     className={`block px-3 py-2 rounded-md text-sm font-medium ${
                       isActive(item.path)
                         ? 'text-[var(--color-primary-500)] bg-[var(--color-primary-50)]'
                         : 'text-[var(--color-accent-600)] hover:text-[var(--color-primary-500)] hover:bg-[var(--color-primary-50)]'
-                }`}
-                onClick={() => setIsOpen(false)}
-              >
+                    }`}
+                    onClick={() => setIsOpen(false)}
+                  >
                     {item.label}
-              </Link>
+                  </Link>
                 )}
               </div>
             ))}
+
+            {/* Auth Section - Mobile */}
+            {user ? (
+              <div className="px-3 py-2 border-t border-[var(--color-accent-200)]">
+                <span className="block font-bold text-[var(--color-secondary-700)] mb-2">Welcome, {user.name}</span>
+                <button
+                  onClick={handleLogout}
+                  className="text-sm text-[var(--color-primary-500)] hover:text-[var(--color-primary-600)]"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <div className="px-3 py-2 border-t border-[var(--color-accent-200)]">
+                <Link
+                  to="/login"
+                  className="block text-sm text-[var(--color-primary-500)] hover:text-[var(--color-primary-600)] mb-2"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Login
+                </Link>
+                <Link
+                  to="/signup"
+                  className="block text-sm bg-[var(--color-primary-500)] text-[var(--color-accent-50)] px-4 py-2 rounded-md hover:bg-[var(--color-primary-600)] transition-colors duration-200"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Sign Up
+                </Link>
+              </div>
+            )}
 
             {/* Social Media Links - Mobile */}
             <div className="px-3 py-4 border-t border-[var(--color-accent-200)]">

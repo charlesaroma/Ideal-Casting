@@ -1,5 +1,5 @@
 export const talentProfiles = {
-  "ICT-ACT-001": {
+  "ACT-001": {
     height: "5'11\"",
     weight: "165 lbs",
     build: "Athletic",
@@ -30,7 +30,7 @@ export const talentProfiles = {
       }
     ]
   },
-  "ICT-MOD-002": {
+  "MOD-002": {
     height: "5'9\"",
     weight: "125 lbs",
     build: "Slim",
@@ -61,7 +61,7 @@ export const talentProfiles = {
       }
     ]
   },
-  "ICT-DNC-003": {
+  "DNC-003": {
     height: "5'10\"",
     weight: "150 lbs",
     build: "Athletic",
@@ -86,7 +86,7 @@ export const talentProfiles = {
       }
     ]
   },
-  "ICT-MOD-006": {
+  "MOD-006": {
     height: "5'8\"",
     weight: "120 lbs",
     build: "Slim",

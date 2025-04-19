@@ -1,6 +1,6 @@
 export const talents = [
   {
-    talentId: "ICT-ACT-001",
+    talentId: "ACT-001",
     name: "John K.",
     primaryRole: "Actor",
     gender: "Male",
@@ -13,7 +13,7 @@ export const talents = [
     profileImage: "https://images.unsplash.com/photo-1522529599102-193c0d76b5b6"
   },
   {
-    talentId: "ICT-MOD-002",
+    talentId: "MOD-002",
     name: "Sarah N.",
     primaryRole: "Model",
     gender: "Female",
@@ -26,7 +26,7 @@ export const talents = [
     profileImage: "https://images.unsplash.com/photo-1534528741775-53994a69daeb"
   },
   {
-    talentId: "ICT-DNC-003",
+    talentId: "DNC-003",
     name: "David M.",
     primaryRole: "Dancer",
     gender: "Male",
@@ -39,7 +39,7 @@ export const talents = [
     profileImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d"
   },
   {
-    talentId: "ICT-SNG-004",
+    talentId: "SNG-004",
     name: "Grace A.",
     primaryRole: "Singer",
     gender: "Female",
@@ -52,7 +52,7 @@ export const talents = [
     profileImage: "https://images.unsplash.com/photo-1567532900872-f4e906cbf06a"
   },
   {
-    talentId: "ICT-HST-005",
+    talentId: "HST-005",
     name: "Mark O.",
     primaryRole: "Host",
     gender: "Male",
@@ -65,7 +65,7 @@ export const talents = [
     profileImage: "https://images.unsplash.com/photo-1633332755192-727a05c4013d"
   },
   {
-    talentId: "ICT-MOD-006",
+    talentId: "MOD-006",
     name: "Lisa K.",
     primaryRole: "Model",
     gender: "Female",
@@ -78,7 +78,7 @@ export const talents = [
     profileImage: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e"
   },
   {
-    talentId: "ICT-ACT-007",
+    talentId: "ACT-007",
     name: "Peter N.",
     primaryRole: "Actor",
     gender: "Male",
@@ -91,7 +91,7 @@ export const talents = [
     profileImage: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d"
   },
   {
-    talentId: "ICT-DNC-008",
+    talentId: "DNC-008",
     name: "Mary W.",
     primaryRole: "Dancer",
     gender: "Female",

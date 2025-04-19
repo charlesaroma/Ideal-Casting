@@ -23,7 +23,7 @@ export default function TalentProfile() {
           <p className="text-[var(--color-accent-600)] mt-2">The talent profile you're looking for doesn't exist.</p>
           <button
             onClick={() => navigate(-1)}
-            className="mt-6 px-6 py-2 bg-[var(--color-primary-500)] text-white rounded-lg hover:bg-[var(--color-primary-600)] transition-colors duration-200 inline-flex items-center gap-2"
+            className="mt-6 px-6 py-2 bg-[var(--color-primary-500)] text-[var(--color-accent-200)] rounded-lg hover:bg-[var(--color-primary-600)] transition-colors duration-200 inline-flex items-center gap-2"
           >
             <Icon icon="mdi:arrow-left" />
             Go Back
@@ -50,7 +50,7 @@ export default function TalentProfile() {
           <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-primary-500)]/20 to-[var(--color-accent-900)]/20" />
           <div className="relative z-10 p-6 sm:p-8 md:p-12 flex flex-col md:flex-row gap-6 md:gap-8 items-center">
             {/* Profile Image */}
-            <div className="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-[var(--color-accent-200)] shadow-xl flex-shrink-0">
+            <div className="w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 rounded overflow-hidden border-2 border-[var(--color-accent-200)] shadow-xl flex-shrink-0">
               <img
                 src={talent.profileImage}
                 alt={talent.name}
@@ -59,12 +59,16 @@ export default function TalentProfile() {
             </div>
 
             {/* Basic Info */}
-            <div className="text-center md:text-left text-white flex-1">
-              <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 justify-center md:justify-start">
+            <div className="text-center md:text-left text-[var(--color-accent-200)] flex-1">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-3">
                 <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">{talent.talentId}</h1>
-                <span className="px-3 py-1 bg-[var(--color-primary-500)]/20 text-[var(--color-primary-300)] rounded-full text-sm">
-                  {talent.availability}
-                </span>
+                {/* Book Now Button */}
+                <div className="w-full sm:w-auto mt-4 sm:mt-0">
+                  <button className="w-full sm:w-auto px-6 py-3 cursor-pointer bg-[var(--color-primary-500)] text-[var(--color-accent-200)] rounded-lg hover:bg-[var(--color-primary-600)] transition-colors duration-200 flex items-center gap-2 justify-center">
+                    <Icon icon="mdi:calendar-plus" className="w-5 h-5" />
+                    Book Through Agency
+                  </button>
+                </div>
               </div>
               <p className="text-lg sm:text-xl text-[var(--color-accent-200)] mt-2">{talent.primaryRole}</p>
               <div className="flex flex-wrap items-center gap-3 sm:gap-4 mt-4 justify-center md:justify-start">
@@ -76,19 +80,7 @@ export default function TalentProfile() {
                   <Icon icon="mdi:clock-outline" className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--color-accent-300)]" />
                   <span className="text-sm sm:text-base text-[var(--color-accent-200)]">{talent.experience} years exp.</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Icon icon="mdi:star" className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" />
-                  <span className="text-sm sm:text-base text-[var(--color-accent-200)]">{talent.rating}</span>
-                </div>
               </div>
-            </div>
-
-            {/* Book Now Button */}
-            <div className="w-full sm:w-auto mt-4 md:mt-0">
-              <button className="w-full sm:w-auto px-6 py-3 bg-[var(--color-primary-500)] text-white rounded-lg hover:bg-[var(--color-primary-600)] transition-colors duration-200 flex items-center gap-2 justify-center">
-                <Icon icon="mdi:calendar-plus" className="w-5 h-5" />
-                Book Through Agency
-              </button>
             </div>
           </div>
         </div>
@@ -155,7 +147,7 @@ export default function TalentProfile() {
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
                           <h4 className="font-medium text-lg">{item.title}</h4>
-                          <p className="text-sm text-gray-200 line-clamp-2">{item.description}</p>
+                          <p className="text-sm text-[var(--color-accent-200)] line-clamp-2">{item.description}</p>
                         </div>
                       </div>
                     </div>
@@ -167,7 +159,7 @@ export default function TalentProfile() {
             {activeTab === 'monologue' && (
               <div className="max-w-3xl mx-auto">
                 <div className="bg-[var(--color-accent-50)] rounded-lg p-6">
-                  <div className="bg-white rounded-lg shadow-md p-6">
+                  <div className="bg-[var(--color-accent-300)] rounded-lg shadow-md p-6">
                     <div className="flex items-start gap-4 mb-4">
                       <div className="w-12 h-12 rounded-full bg-[var(--color-primary-500)]/10 flex items-center justify-center flex-shrink-0">
                         <Icon icon="mdi:video" className="w-6 h-6 text-[var(--color-primary-500)]" />
@@ -185,7 +177,7 @@ export default function TalentProfile() {
                           rel="noopener noreferrer"
                           className="flex flex-col items-center gap-3 text-[var(--color-primary-500)] hover:text-[var(--color-primary-600)] transition-colors duration-200"
                         >
-                          <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center shadow-lg">
+                          <div className="w-16 h-16 rounded-full bg-var(--color-accent-100)/90 flex items-center justify-center shadow-lg">
                             <Icon icon="mdi:play" className="w-8 h-8" />
                           </div>
                           <span className="font-medium">Watch Monologue</span>
@@ -205,7 +197,7 @@ export default function TalentProfile() {
               <div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <h3 className="font-medium text-[var(--color-accent-900)] mb-4">Professional Skills</h3>
+                    <h3 className="font-medium text-[var(--color-primary-500)] mb-4">Professional Skills</h3>
                     <div className="flex flex-wrap gap-2">
                       {talent.skills.map((skill) => (
                         <span key={skill} className="px-3 py-1 bg-[var(--color-accent-100)] text-[var(--color-accent-700)] rounded-full text-sm">
@@ -215,7 +207,7 @@ export default function TalentProfile() {
                     </div>
                   </div>
                   <div>
-                    <h3 className="font-medium text-[var(--color-accent-900)] mb-4">Experience Highlights</h3>
+                    <h3 className="font-medium text-[var(--color-primary-500)] mb-4">Experience Highlights</h3>
                     <ul className="space-y-4">
                       {profile.experience_highlights.map((exp, index) => (
                         <li key={index} className="flex gap-4">
