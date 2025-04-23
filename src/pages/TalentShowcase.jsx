@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 import { talents } from '../data/sampleTalents';
+import { talentProfiles } from '../data/sampleTalentProfiles';
 
 const TalentShowcase = () => {
   // Get only top-rated talents (rating >= 4.8) and limit to 4
@@ -14,26 +15,26 @@ const TalentShowcase = () => {
     {
       id: 1,
       quote: "Ideal Casting has been instrumental in showcasing Ugandan talent to the world. Their professional approach and understanding of our local arts scene is unmatched.",
-      author: "ICT-ACT-007",
+      author: talents.find(t => t.talentId === "ACT-007").name,
       role: "Award-Winning Actor",
       achievement: "Lead role in Netflix's upcoming African series",
-      image: talents.find(t => t.talentId === "ICT-ACT-007").profileImage
+      image: talents.find(t => t.talentId === "ACT-007").profileImage
     },
     {
       id: 2,
       quote: "Through Ideal Casting, I've landed roles in international productions while staying true to my Ugandan roots. They truly understand both local and global entertainment markets.",
-      author: "ICT-MOD-002",
+      author: talents.find(t => t.talentId === "MOD-002").name,
       role: "Professional Model",
       achievement: "Featured in Vogue Africa 2024",
-      image: talents.find(t => t.talentId === "ICT-MOD-002").profileImage
+      image: talents.find(t => t.talentId === "MOD-002").profileImage
     },
     {
       id: 3,
       quote: "The team at Ideal Casting helped me break into the industry and build my portfolio. They're more than agents; they're career builders.",
-      author: "ICT-DNC-003",
+      author: talents.find(t => t.talentId === "DNC-003").name,
       role: "Rising Star",
       achievement: "Choreographer for World Dance Championship",
-      image: talents.find(t => t.talentId === "ICT-DNC-003").profileImage
+      image: talents.find(t => t.talentId === "DNC-003").profileImage
     }
   ];
 
@@ -99,7 +100,7 @@ const TalentShowcase = () => {
                     <div className="relative h-48">
                       <img
                         src={talent.profileImage}
-                        alt={`Talent ${talent.talentId}`}
+                        alt={`${talent.name}`}
                         className="w-full h-48 object-cover"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-accent-900)] via-transparent to-transparent opacity-80" />
@@ -108,12 +109,15 @@ const TalentShowcase = () => {
                     {/* Content */}
                     <div className="flex-grow p-6 flex flex-col justify-between">
                       <div>
-                        {/* ID and Role */}
+                        {/* Name and Role */}
                         <h3 className="text-xl font-bold text-[var(--color-accent-900)] mb-1">
-                          {talent.talentId}
+                          {talent.name}
                         </h3>
-                        <p className="text-[var(--color-primary-600)] font-medium mb-4">
+                        <p className="text-[var(--color-primary-600)] font-medium mb-2">
                           {talent.primaryRole}
+                        </p>
+                        <p className="text-sm text-[var(--color-accent-600)] mb-4">
+                          ID: {talent.talentId}
                         </p>
 
                         {/* Skills */}
@@ -122,7 +126,7 @@ const TalentShowcase = () => {
                             Skills
                           </h4>
                           <div className="flex flex-wrap gap-2">
-                            {talent.skills.slice(0, 1).map((skill, index) => (
+                            {talent.skills.slice(0, 2).map((skill, index) => (
                               <span
                                 key={index}
                                 className="text-sm bg-[var(--color-accent-100)] text-[var(--color-accent-700)] px-3 py-1 rounded-full"
@@ -130,9 +134,9 @@ const TalentShowcase = () => {
                                 {skill}
                               </span>
                             ))}
-                            {talent.skills.length > 1 && (
+                            {talent.skills.length > 2 && (
                               <span className="text-sm text-[var(--color-accent-600)]">
-                                +{talent.skills.length - 1} more
+                                +{talent.skills.length - 2} more
                               </span>
                             )}
                           </div>
@@ -149,7 +153,7 @@ const TalentShowcase = () => {
                           <div className="flex items-center gap-1">
                             <Icon icon="mdi:star" className="text-[var(--color-primary-500)]" />
                             <span className="text-sm text-[var(--color-accent-700)]">
-                              {talent.rating} / 5.0
+                              {talent.rating.toFixed(1)}
                             </span>
                           </div>
                         </div>
@@ -172,8 +176,8 @@ const TalentShowcase = () => {
                         </div>
                       </div>
 
-                      {/* Action Buttons - Fixed at bottom */}
-                      <div className="mt-4 pb-2"> {/* Added padding bottom here */}
+                      {/* Action Buttons */}
+                      <div className="mt-4">
                         <div className="flex items-center gap-2">
                           <Link
                             to={`/talent/${talent.talentId}`}

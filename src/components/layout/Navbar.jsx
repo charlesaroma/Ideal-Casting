@@ -14,11 +14,28 @@ const Navbar = () => {
   const location = useLocation();
 
   useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === 'user') {
+        window.location.reload();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    // Check for initial login/signup
     const savedUser = localStorage.getItem('user');
     if (savedUser) {
-      setUser(JSON.parse(savedUser));
+      const currentUser = JSON.parse(savedUser);
+      if (JSON.stringify(currentUser) !== JSON.stringify(user)) {
+        setUser(currentUser);
+        window.location.reload();
+      }
     }
-  }, []);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [user]);
 
   const navStructure = [
     { path: '/', label: 'Home' },
@@ -160,8 +177,13 @@ const Navbar = () => {
           <div className="hidden md:flex items-center justify-end w-48">
             {user ? (
               <div className="flex items-center space-x-3 group">
-                <div className="w-8 h-8 rounded-full bg-[var(--color-secondary-100)] text-[var(--color-secondary-700)] flex items-center justify-center text-xs font-semibold uppercase transform transition-transform group-hover:scale-105">
-                  {getInitials(user.name)}
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 rounded-full bg-[var(--color-secondary-100)] text-[var(--color-secondary-700)] flex items-center justify-center text-xs font-semibold uppercase transform transition-transform group-hover:scale-105">
+                    {getInitials(user.name)}
+                  </div>
+                  <span className="text-sm font-medium text-[var(--color-accent-600)]">
+                    {user.name}
+                  </span>
                 </div>
                 <button
                   onClick={handleLogout}
