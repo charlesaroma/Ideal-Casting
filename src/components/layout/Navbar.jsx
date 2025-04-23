@@ -273,6 +273,150 @@ const Navbar = () => {
             </button>
           </div>
         </div>
+
+        {/* Mobile Menu */}
+        <div
+          className={`md:hidden transition-all duration-300 ease-in-out ${
+            isOpen
+              ? 'max-h-screen opacity-100 visible'
+              : 'max-h-0 opacity-0 invisible'
+          } overflow-hidden`}
+        >
+          <div className="py-4 space-y-2 bg-[var(--color-accent-50)] shadow-inner">
+            {/* Mobile Auth Section */}
+            <div className="px-4 py-2 border-b border-[var(--color-accent-200)]">
+              {user ? (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 rounded-full bg-[var(--color-secondary-100)] text-[var(--color-secondary-700)] flex items-center justify-center text-xs font-semibold uppercase">
+                      {getInitials(user.name)}
+                    </div>
+                    <span className="text-sm font-medium text-[var(--color-accent-600)]">
+                      {user.name}
+                    </span>
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    className="text-sm text-[var(--color-primary-500)] hover:text-[var(--color-primary-600)]"
+                  >
+                    Logout
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between">
+                  <Link
+                    to="/login"
+                    className="text-sm text-[var(--color-primary-500)] hover:text-[var(--color-primary-600)]"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    to="/signup"
+                    className="text-sm bg-[var(--color-primary-500)] text-[var(--color-accent-50)] px-4 py-2 rounded-md hover:bg-[var(--color-primary-600)]"
+                  >
+                    Sign Up
+                  </Link>
+                </div>
+              )}
+            </div>
+
+            {/* Mobile Navigation Items */}
+            {navStructure.map((item) => (
+              <div key={item.label}>
+                {item.items ? (
+                  <div>
+                    <button
+                      onClick={() => setActiveDropdown(activeDropdown === item.label ? null : item.label)}
+                      className="w-full px-4 py-2 flex items-center justify-between text-[var(--color-accent-600)] hover:text-[var(--color-primary-500)]"
+                    >
+                      <span>{item.label}</span>
+                      <Icon
+                        icon="mdi:chevron-down"
+                        className={`w-5 h-5 transition-transform duration-200 ${
+                          activeDropdown === item.label ? 'rotate-180' : ''
+                        }`}
+                      />
+                    </button>
+                    <div
+                      className={`bg-[var(--color-accent-100)] transition-all duration-200 ${
+                        activeDropdown === item.label
+                          ? 'max-h-48 opacity-100'
+                          : 'max-h-0 opacity-0'
+                      } overflow-hidden`}
+                    >
+                      {item.items.map((subItem) => (
+                        <Link
+                          key={subItem.path}
+                          to={subItem.path}
+                          onClick={() => setIsOpen(false)}
+                          className={`block px-8 py-2 text-sm ${
+                            isActive(subItem.path)
+                              ? 'text-[var(--color-primary-500)] bg-[var(--color-primary-50)]'
+                              : 'text-[var(--color-accent-600)] hover:text-[var(--color-primary-500)] hover:bg-[var(--color-primary-50)]'
+                          }`}
+                        >
+                          {subItem.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <Link
+                    to={item.path}
+                    onClick={() => setIsOpen(false)}
+                    className={`block px-4 py-2 text-sm ${
+                      isActive(item.path)
+                        ? 'text-[var(--color-primary-500)] bg-[var(--color-primary-50)]'
+                        : 'text-[var(--color-accent-600)] hover:text-[var(--color-primary-500)] hover:bg-[var(--color-primary-50)]'
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                )}
+              </div>
+            ))}
+
+            {/* Mobile Admin Navigation */}
+            {user?.role === 'admin' && (
+              <div>
+                <button
+                  onClick={() => setActiveDropdown(activeDropdown === 'Admin' ? null : 'Admin')}
+                  className="w-full px-4 py-2 flex items-center justify-between text-[var(--color-accent-600)] hover:text-[var(--color-primary-500)]"
+                >
+                  <span>Admin</span>
+                  <Icon
+                    icon="mdi:chevron-down"
+                    className={`w-5 h-5 transition-transform duration-200 ${
+                      activeDropdown === 'Admin' ? 'rotate-180' : ''
+                    }`}
+                  />
+                </button>
+                <div
+                  className={`bg-[var(--color-accent-100)] transition-all duration-200 ${
+                    activeDropdown === 'Admin'
+                      ? 'max-h-48 opacity-100'
+                      : 'max-h-0 opacity-0'
+                  } overflow-hidden`}
+                >
+                  {adminNavItems.map((item) => (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      onClick={() => setIsOpen(false)}
+                      className={`block px-8 py-2 text-sm ${
+                        isActive(item.path)
+                          ? 'text-[var(--color-primary-500)] bg-[var(--color-primary-50)]'
+                          : 'text-[var(--color-accent-600)] hover:text-[var(--color-primary-500)] hover:bg-[var(--color-primary-50)]'
+                      }`}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </nav>
   );
