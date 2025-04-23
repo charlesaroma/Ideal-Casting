@@ -1,8 +1,47 @@
 import { Link } from "react-router-dom";
 import { Icon } from "@iconify/react";
-import { talents } from "../data/sampleTalents";
+import { useState, useEffect } from "react";
+import { collection, onSnapshot, query, orderBy, limit } from "firebase/firestore";
+import { db } from "../firebase/config";
 
 const Home = () => {
+  const [featuredTalents, setFeaturedTalents] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Fetch top-rated talents from Firestore
+    const q = query(
+      collection(db, 'talents'),
+      orderBy('rating', 'desc'),
+      limit(3)
+    );
+
+    const unsubscribe = onSnapshot(q, 
+      (snapshot) => {
+        const talentsList = snapshot.docs.map(doc => ({
+          ...doc.data(),
+          id: doc.id
+        }));
+        
+        // Sort talents to ensure ACT-003 appears last
+        const sortedTalents = talentsList.sort((a, b) => {
+          if (a.talentId === "ACT-003") return 1;
+          if (b.talentId === "ACT-003") return -1;
+          return 0;
+        });
+        
+        setFeaturedTalents(sortedTalents);
+        setLoading(false);
+      },
+      (err) => {
+        console.error('Error fetching talents:', err);
+        setLoading(false);
+      }
+    );
+
+    return () => unsubscribe();
+  }, []);
+
   const features = [
     {
       icon: "mdi:account-group",
@@ -30,29 +69,18 @@ const Home = () => {
     },
   ];
 
-  const featuredTalents = [
-    {
-      id: talents[0].talentId,
-      role: talents[0].primaryRole,
-      image: talents[0].profileImage,
-      specialty: talents[0].skills[0],
-      availability: talents[0].availability
-    },
-    {
-      id: talents[2].talentId,
-      role: talents[2].primaryRole,
-      image: talents[2].profileImage,
-      specialty: talents[2].skills[0],
-      availability: talents[2].availability
-    },
-    {
-      id: talents[5].talentId,
-      role: talents[5].primaryRole,
-      image: talents[5].profileImage,
-      specialty: talents[5].skills[0],
-      availability: talents[5].availability
-    }
-  ];
+  if (loading) {
+    return (
+      <div className="flex flex-col min-h-screen bg-[var(--color-accent-50)]">
+        <div className="flex-grow flex items-center justify-center">
+          <div className="flex items-center gap-2">
+            <Icon icon="mdi:loading" className="w-6 h-6 animate-spin text-[var(--color-primary-500)]" />
+            <span className="text-[var(--color-accent-900)]">Loading...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-[var(--color-accent-50)]">
@@ -71,7 +99,7 @@ const Home = () => {
                   <span className="text-[var(--color-primary-500)]">
                     on demand.
                   </span>
-          </h1>
+                </h1>
                 <div className="h-1 w-32 bg-[var(--color-primary-500)] mb-4 sm:mb-6 mx-auto lg:mx-0"></div>
                 <p className="text-lg sm:text-xl text-[var(--color-accent-600)] mb-6 sm:mb-8 max-w-xl mx-auto lg:mx-0">
                   From startups to industry leaders — discover exceptional
@@ -79,36 +107,36 @@ const Home = () => {
                   creative projects.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-            <Link
-              to="/talent-directory"
+                  <Link
+                    to="/talent-directory"
                     className="px-8 py-4 bg-[var(--color-primary-500)] text-[var(--color-accent-200)] rounded-full font-semibold hover:bg-[var(--color-primary-600)] transition-all duration-200 shadow-lg hover:shadow-xl text-center"
-            >
+                  >
                     Explore Talent
-            </Link>
-            <Link
-              to="/contact"
+                  </Link>
+                  <Link
+                    to="/contact"
                     className="px-8 py-4 bg-[var(--color-accent-200)] text-[var(--color-primary-500)] rounded-full font-semibold hover:bg-[var(--color-accent-100)] transition-all duration-200 shadow-lg hover:shadow-xl text-center"
-            >
+                  >
                     Join Network
-            </Link>
-          </div>
-        </div>
+                  </Link>
+                </div>
+              </div>
 
               {/* Right Content - Floating Cards */}
               <div className="relative h-[450px] sm:h-[500px] lg:h-[600px] mt-12 lg:mt-0">
                 {/* Mobile/Tablet View */}
                 <div className="block lg:hidden">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-2xl mx-auto">
-                    {featuredTalents.slice(0, 2).map((talent, index) => (
+                    {featuredTalents.slice(0, 2).map((talent) => (
                       <div
                         key={talent.id}
                         className="bg-[var(--color-accent-200)] rounded-2xl shadow-xl overflow-hidden"
                       >
-                        <div className="relative aspect-[4/3]">
+                        <div className="relative aspect-[4/3] overflow-hidden">
                           <img
-                            src={talent.image}
-                            alt={`${talent.role} Talent`}
-                            className="w-full h-full object-cover"
+                            src={talent.profileImage}
+                            alt={`${talent.primaryRole} Talent`}
+                            className="w-full h-[120%] object-cover object-center -translate-y-[10%]"
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-accent-900)]/60 to-transparent"></div>
                         </div>
@@ -120,14 +148,14 @@ const Home = () => {
                             </span>
                           </div>
                           <h3 className="text-lg font-semibold text-[var(--color-accent-900)]">
-                            {talent.id}
+                            {talent.name}
                           </h3>
                           <div className="flex items-center justify-between">
                             <p className="text-sm text-[var(--color-accent-600)]">
-                              {talent.role}
+                              {talent.primaryRole}
                             </p>
                             <span className="text-xs px-2 py-1 bg-[var(--color-accent-100)] text-[var(--color-accent-700)] rounded-full">
-                              {talent.specialty}
+                              {talent.skills[0]}
                             </span>
                           </div>
                         </div>
@@ -149,11 +177,11 @@ const Home = () => {
                           : "w-64 sm:w-72 top-64 sm:bottom-20 right-24 sm:right-40 rotate-12"
                       }`}
                     >
-                      <div className="relative aspect-[4/3]">
+                      <div className="relative aspect-[4/3] overflow-hidden">
                         <img
-                          src={talent.image}
-                          alt={`${talent.role} Talent`}
-                          className="w-full h-full object-cover"
+                          src={talent.profileImage}
+                          alt={`${talent.primaryRole} Talent`}
+                          className="w-full object-cover object-center -translate-y-[10%]"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-accent-900)]/60 to-transparent"></div>
                       </div>
@@ -165,14 +193,14 @@ const Home = () => {
                           </span>
                         </div>
                         <h3 className="text-lg font-semibold text-[var(--color-accent-900)]">
-                          {talent.id}
+                          {talent.name}
                         </h3>
                         <div className="flex items-center justify-between">
                           <p className="text-sm text-[var(--color-accent-600)]">
-                            {talent.role}
+                            {talent.primaryRole}
                           </p>
                           <span className="text-xs px-2 py-1 bg-[var(--color-accent-100)] text-[var(--color-accent-700)] rounded-full">
-                            {talent.specialty}
+                            {talent.skills[0]}
                           </span>
                         </div>
                       </div>
@@ -192,45 +220,45 @@ const Home = () => {
           <div className="absolute inset-0 overflow-hidden">
             <div className="absolute -top-1/2 -right-1/2 w-[1000px] h-[1000px] bg-[var(--color-primary-500)]/5 rounded-full"></div>
             <div className="absolute -bottom-1/4 -left-1/4 w-[800px] h-[800px] bg-[var(--color-accent-200)]/10 rounded-full"></div>
-        </div>
-      </section>
+          </div>
+        </section>
 
-      {/* Features Section */}
+        {/* Features Section */}
         <section className="py-12 sm:py-16 md:py-20 bg-[var(--color-accent-100)]">
           <div className="container-custom px-4 sm:px-6">
             <div className="text-center mb-12 sm:mb-16">
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--color-primary-500)] mb-4">
-              Why Choose Ideal Casting
-            </h2>
+                Why Choose Ideal Casting
+              </h2>
               <p className="text-base sm:text-lg text-[var(--color-accent-600)] max-w-2xl mx-auto">
                 We provide comprehensive talent management services to help you
                 find the perfect match for your creative vision.
-            </p>
-          </div>
+              </p>
+            </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-            {features.map((feature) => (
-              <div
-                key={feature.title}
+              {features.map((feature) => (
+                <div
+                  key={feature.title}
                   className="bg-[var(--color-accent-50)] p-6 sm:p-8 rounded-2xl hover:shadow-xl transition-all duration-200"
-              >
-                <Icon
-                  icon={feature.icon}
+                >
+                  <Icon
+                    icon={feature.icon}
                     className="w-10 h-10 sm:w-12 sm:h-12 text-[var(--color-primary-500)] mb-4"
-                />
+                  />
                   <h3 className="text-lg sm:text-xl font-semibold text-[var(--color-accent-900)] mb-2">
-                  {feature.title}
-                </h3>
+                    {feature.title}
+                  </h3>
                   <p className="text-sm sm:text-base text-[var(--color-accent-600)]">
                     {feature.description}
                   </p>
-              </div>
-            ))}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* CTA Section */}
+        {/* CTA Section */}
         <section className="relative py-20 overflow-hidden">
           {/* Background Pattern */}
           <div className="absolute inset-0 bg-[var(--color-accent-900)]">
@@ -253,7 +281,6 @@ const Home = () => {
                       <div className="absolute inset-0 bg-[var(--color-primary-500)]"></div>
                     </div>
                   </span>
-                
                 </h2>
                 <p className="text-base sm:text-lg text-[var(--color-accent-200)]/80 max-w-2xl mx-auto mb-12 leading-relaxed">
                   Join Uganda's premier casting network. Whether you're seeking talent or looking to showcase your abilities,
@@ -272,8 +299,6 @@ const Home = () => {
                       <Icon icon="mdi:arrow-right" className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />
                     </span>
                   </Link>
-                  
-                  
                 </div>
               </div>
 

@@ -1,42 +1,79 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Icon } from '@iconify/react';
-import { talents } from '../data/sampleTalents';
-import { talentProfiles } from '../data/sampleTalentProfiles';
+import { collection, onSnapshot, query, orderBy, limit } from 'firebase/firestore';
+import { db } from '../firebase/config';
 
 const TalentShowcase = () => {
-  // Get only top-rated talents (rating >= 4.8) and limit to 4
-  const topTalents = talents
-    .filter(talent => talent.rating >= 4.8)
-    .slice(0, 4);
+  const [topTalents, setTopTalents] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Fetch top-rated talents from Firestore
+    const q = query(
+      collection(db, 'talents'),
+      orderBy('rating', 'desc'),
+      limit(4)
+    );
+
+    const unsubscribe = onSnapshot(q, 
+      (snapshot) => {
+        const talentsList = snapshot.docs.map(doc => ({
+          ...doc.data(),
+          id: doc.id
+        }));
+        setTopTalents(talentsList);
+        setLoading(false);
+      },
+      (err) => {
+        console.error('Error fetching talents:', err);
+        setLoading(false);
+      }
+    );
+
+    return () => unsubscribe();
+  }, []);
 
   // Recent success stories with specific achievements
   const successStories = [
     {
       id: 1,
       quote: "Ideal Casting has been instrumental in showcasing Ugandan talent to the world. Their professional approach and understanding of our local arts scene is unmatched.",
-      author: talents.find(t => t.talentId === "ACT-007").name,
+      author: "Charles Aroma",
       role: "Award-Winning Actor",
       achievement: "Lead role in Netflix's upcoming African series",
-      image: talents.find(t => t.talentId === "ACT-007").profileImage
+      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d"
     },
     {
       id: 2,
       quote: "Through Ideal Casting, I've landed roles in international productions while staying true to my Ugandan roots. They truly understand both local and global entertainment markets.",
-      author: talents.find(t => t.talentId === "MOD-002").name,
+      author: "Sarah N.",
       role: "Professional Model",
       achievement: "Featured in Vogue Africa 2024",
-      image: talents.find(t => t.talentId === "MOD-002").profileImage
+      image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb"
     },
     {
       id: 3,
       quote: "The team at Ideal Casting helped me break into the industry and build my portfolio. They're more than agents; they're career builders.",
-      author: talents.find(t => t.talentId === "DNC-003").name,
+      author: "David M.",
       role: "Rising Star",
       achievement: "Choreographer for World Dance Championship",
-      image: talents.find(t => t.talentId === "DNC-003").profileImage
+      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d"
     }
   ];
+
+  if (loading) {
+    return (
+      <div className="flex flex-col min-h-screen bg-[var(--color-accent-50)]">
+        <div className="flex-grow flex items-center justify-center">
+          <div className="flex items-center gap-2">
+            <Icon icon="mdi:loading" className="w-6 h-6 animate-spin text-[var(--color-primary-500)]" />
+            <span className="text-[var(--color-accent-900)]">Loading...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-[var(--color-accent-50)]">
@@ -93,15 +130,15 @@ const TalentShowcase = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 {topTalents.map((talent) => (
                   <div
-                    key={talent.talentId}
+                    key={talent.id}
                     className="group relative bg-[var(--color-accent-200)] rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 flex flex-col pb-4"
                   >
                     {/* Image and Gradient Overlay */}
-                    <div className="relative h-48">
+                    <div className="relative h-48 overflow-hidden">
                       <img
                         src={talent.profileImage}
                         alt={`${talent.name}`}
-                        className="w-full h-48 object-cover"
+                        className="w-full h-full object-contain bg-[var(--color-accent-100)]"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-accent-900)] via-transparent to-transparent opacity-80" />
                     </div>
