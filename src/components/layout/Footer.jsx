@@ -145,7 +145,7 @@ const Footer = () => {
               <div className="flex items-center gap-2">
                 <Icon icon="mdi:heart" className="w-4 h-4 text-[var(--color-primary-500)]" />
                 <p className="text-[var(--color-accent-400)] text-sm">
-                  Crafted with passion by Charles Aroma
+                  Crafted with passion by Charles Aroma & Aron Adupa
                 </p>
               </div>
             </div>
