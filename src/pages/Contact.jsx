@@ -1,5 +1,7 @@
 import React from 'react';
 import { Icon } from '@iconify/react';
+import { Formik, Form, Field } from 'formik';
+import * as Yup from 'yup';
 
 const Contact = () => {
   const contactInfo = [
@@ -24,6 +26,38 @@ const Contact = () => {
       ]
     }
   ];
+
+  // Validation Schema
+  const ContactSchema = Yup.object().shape({
+    name: Yup.string()
+      .min(2, 'Name is too short')
+      .max(50, 'Name is too long')
+      .required('Name is required'),
+    email: Yup.string()
+      .email('Invalid email address')
+      .required('Email is required'),
+    industry: Yup.string()
+      .required('Please select an industry'),
+    message: Yup.string()
+      .min(10, 'Message is too short')
+      .max(1000, 'Message is too long')
+      .required('Message is required'),
+  });
+
+  const handleSubmit = async (values, { setSubmitting, resetForm }) => {
+    try {
+      // TODO: Implement your form submission logic here
+      console.log('Form values:', values);
+      // Reset form after successful submission
+      resetForm();
+      alert('Message sent successfully!');
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      alert('Failed to send message. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-[var(--color-accent-50)]">
@@ -85,63 +119,109 @@ const Contact = () => {
 
               {/* Right Column - Contact Form */}
               <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 lg:p-10">
-                <form className="space-y-5 sm:space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium text-[var(--color-accent-600)] mb-2">
-                      Name
-                    </label>
-                    <input
-                      type="text"
-                      className="w-full p-3 sm:p-4 bg-[var(--color-accent-50)] border-none rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]"
-                      placeholder="Jane Smith"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-[var(--color-accent-600)] mb-2">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      className="w-full p-3 sm:p-4 bg-[var(--color-accent-50)] border-none rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]"
-                      placeholder="jane@example.com"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-[var(--color-accent-600)] mb-2">
-                      Industry
-                    </label>
-                    <select
-                      className="w-full p-3 sm:p-4 bg-[var(--color-accent-50)] border-none rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]"
-                    >
-                      <option value="">Select...</option>
-                      <option value="film">Film & TV</option>
-                      <option value="commercial">Commercial</option>
-                      <option value="theater">Theater</option>
-                      <option value="modeling">Modeling</option>
-                      <option value="other">Other</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-[var(--color-accent-600)] mb-2">
-                      Message
-                    </label>
-                    <textarea
-                      rows="4"
-                      className="w-full p-3 sm:p-4 bg-[var(--color-accent-50)] border-none rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]"
-                      placeholder="Type your message..."
-                    ></textarea>
-                  </div>
-                  <button
-                    type="submit"
-                    className="w-full group relative flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-[var(--color-primary-500)] text-white rounded-lg text-sm sm:text-base font-semibold hover:bg-[var(--color-primary-600)] transition-all duration-200 hover:scale-[1.02]"
-                  >
-                    Get a Solution
-                    <Icon 
-                      icon="mdi:arrow-right" 
-                      className="w-4 h-4 sm:w-5 sm:h-5 ml-2 group-hover:translate-x-1 transition-transform duration-200"
-                    />
-                  </button>
-                </form>
+                <Formik
+                  initialValues={{
+                    name: '',
+                    email: '',
+                    industry: '',
+                    message: ''
+                  }}
+                  validationSchema={ContactSchema}
+                  onSubmit={handleSubmit}
+                >
+                  {({ errors, touched, isSubmitting }) => (
+                    <Form className="space-y-5 sm:space-y-6">
+                      <div>
+                        <label className="block text-sm font-medium text-[var(--color-accent-600)] mb-2">
+                          Name
+                        </label>
+                        <Field
+                          name="name"
+                          type="text"
+                          className={`w-full p-3 sm:p-4 bg-[var(--color-accent-50)] border-none rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)] ${
+                            errors.name && touched.name ? 'ring-2 ring-red-500' : ''
+                          }`}
+                          placeholder="Charles Aroma"
+                        />
+                        {errors.name && touched.name && (
+                          <div className="text-red-500 text-sm mt-1">{errors.name}</div>
+                        )}
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-[var(--color-accent-600)] mb-2">
+                          Email
+                        </label>
+                        <Field
+                          name="email"
+                          type="email"
+                          className={`w-full p-3 sm:p-4 bg-[var(--color-accent-50)] border-none rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)] ${
+                            errors.email && touched.email ? 'ring-2 ring-red-500' : ''
+                          }`}
+                          placeholder="charlesaroma@gmail.com"
+                        />
+                        {errors.email && touched.email && (
+                          <div className="text-red-500 text-sm mt-1">{errors.email}</div>
+                        )}
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-[var(--color-accent-600)] mb-2">
+                          Industry
+                        </label>
+                        <Field
+                          as="select"
+                          name="industry"
+                          className={`w-full p-3 sm:p-4 bg-[var(--color-accent-50)] border-none rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)] ${
+                            errors.industry && touched.industry ? 'ring-2 ring-red-500' : ''
+                          }`}
+                        >
+                          <option value="">Select...</option>
+                          <option value="film">Film & TV</option>
+                          <option value="commercial">Commercial</option>
+                          <option value="theater">Theater</option>
+                          <option value="modeling">Modeling</option>
+                          <option value="other">Other</option>
+                        </Field>
+                        {errors.industry && touched.industry && (
+                          <div className="text-red-500 text-sm mt-1">{errors.industry}</div>
+                        )}
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-[var(--color-accent-600)] mb-2">
+                          Message
+                        </label>
+                        <Field
+                          as="textarea"
+                          name="message"
+                          rows="4"
+                          className={`w-full p-3 sm:p-4 bg-[var(--color-accent-50)] border-none rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)] ${
+                            errors.message && touched.message ? 'ring-2 ring-red-500' : ''
+                          }`}
+                          placeholder="Type your message..."
+                        />
+                        {errors.message && touched.message && (
+                          <div className="text-red-500 text-sm mt-1">{errors.message}</div>
+                        )}
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className={`w-full group relative flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-[var(--color-primary-500)] text-white rounded-lg text-sm sm:text-base font-semibold hover:bg-[var(--color-primary-600)] transition-all duration-200 hover:scale-[1.02] ${
+                          isSubmitting ? 'opacity-70 cursor-not-allowed' : ''
+                        }`}
+                      >
+                        {isSubmitting ? 'Sending...' : 'Get a Solution'}
+                        <Icon 
+                          icon="mdi:arrow-right" 
+                          className="w-4 h-4 sm:w-5 sm:h-5 ml-2 group-hover:translate-x-1 transition-transform duration-200"
+                        />
+                      </button>
+                    </Form>
+                  )}
+                </Formik>
               </div>
             </div>
           </div>
