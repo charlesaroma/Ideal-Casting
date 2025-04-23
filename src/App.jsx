@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { subscribeToAuthChanges } from './firebase/auth';
+import { getDocument } from './firebase/firestore';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import ScrollToTop from './components/utils/ScrollToTop';
@@ -20,12 +22,49 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AddTalent from './pages/admin/AddTalent';
 import EditTalent from './pages/admin/EditTalent';
 import ManageTalents from './pages/admin/ManageTalents';
+import BookingRequests from './pages/admin/BookingRequests';
 
 function App() {
-  const [user, setUser] = useState(() => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Subscribe to auth state changes
+    const unsubscribe = subscribeToAuthChanges(async (firebaseUser) => {
+      if (firebaseUser) {
+        try {
+          // Get user data from Firestore
+          const { data: userData } = await getDocument('users', firebaseUser.uid);
+          if (userData) {
+            const userInfo = {
+              uid: firebaseUser.uid,
+              email: firebaseUser.email,
+              name: userData.name,
+              role: userData.role
+            };
+            setUser(userInfo);
+            localStorage.setItem('user', JSON.stringify(userInfo));
+          }
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+          setUser(null);
+          localStorage.removeItem('user');
+        }
+      } else {
+        setUser(null);
+        localStorage.removeItem('user');
+      }
+      setLoading(false);
+    });
+
+    // Check for saved user data
     const savedUser = localStorage.getItem('user');
-    return savedUser ? JSON.parse(savedUser) : null;
-  });
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+
+    return () => unsubscribe();
+  }, []);
 
   const handleLogin = (userInfo) => {
     setUser(userInfo);
@@ -34,6 +73,9 @@ function App() {
 
   // Protected Route component for regular users
   const ProtectedRoute = ({ children }) => {
+    if (loading) {
+      return <div>Loading...</div>;
+    }
     if (!user) {
       return <Navigate to="/login" />;
     }
@@ -42,17 +84,24 @@ function App() {
 
   // Protected Route component for admin users
   const AdminRoute = ({ children }) => {
+    if (loading) {
+      return <div>Loading...</div>;
+    }
     if (!user || user.role !== 'admin') {
       return <Navigate to="/admin-login" />;
     }
     return children;
   };
 
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <Router>
       <ScrollToTop />
       <div className="flex flex-col min-h-screen bg-accent-50">
-        <Navbar />
+        <Navbar user={user} />
         <main className="flex-grow">
           <div>
             <Routes>
@@ -124,6 +173,14 @@ function App() {
                 element={
                   <AdminRoute>
                     <ManageTalents />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/booking-requests"
+                element={
+                  <AdminRoute>
+                    <BookingRequests />
                   </AdminRoute>
                 }
               />

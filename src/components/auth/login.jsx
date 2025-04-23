@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
+import { signIn } from '../../firebase/auth';
 
 const Login = ({ onLogin }) => {
   const navigate = useNavigate();
@@ -8,23 +9,39 @@ const Login = ({ onLogin }) => {
     email: '',
     password: '',
   });
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    setIsLoading(true);
     
-    // Regular user login
-    const user = {
-      name: formData.email.split('@')[0],
-      email: formData.email,
-      role: 'user'
-    };
-    
-    // Save to localStorage and update state
-    localStorage.setItem('user', JSON.stringify(user));
-    await onLogin(user);
-    
-    // Force a page reload to ensure all components update
-    window.location.href = '/';
+    try {
+      const { user, error } = await signIn(formData.email, formData.password);
+      
+      if (error) {
+        setError(error);
+        return;
+      }
+
+      if (user) {
+        const userData = {
+          uid: user.uid,
+          email: user.email,
+          name: user.displayName || formData.email.split('@')[0],
+          role: 'user'
+        };
+        
+        localStorage.setItem('user', JSON.stringify(userData));
+        await onLogin(userData);
+        navigate('/');
+      }
+    } catch (err) {
+      setError('Failed to sign in. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -35,6 +52,12 @@ const Login = ({ onLogin }) => {
             <h1 className="text-2xl font-bold text-[var(--color-accent-900)] mb-6">
               Login to Your Account
             </h1>
+
+            {error && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm">
+                {error}
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
@@ -76,9 +99,17 @@ const Login = ({ onLogin }) => {
 
               <button
                 type="submit"
-                className="w-full py-2 px-4 bg-[var(--color-primary-500)] text-white rounded-lg hover:bg-[var(--color-primary-600)] transition-colors duration-200"
+                disabled={isLoading}
+                className="w-full py-2 px-4 bg-[var(--color-primary-500)] text-white rounded-lg hover:bg-[var(--color-primary-600)] transition-colors duration-200 flex items-center justify-center gap-2"
               >
-                Login
+                {isLoading ? (
+                  <>
+                    <Icon icon="mdi:loading" className="w-5 h-5 animate-spin" />
+                    Signing in...
+                  </>
+                ) : (
+                  'Login'
+                )}
               </button>
             </form>
 

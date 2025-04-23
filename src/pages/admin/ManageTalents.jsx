@@ -1,23 +1,76 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
-import { talents } from '../../data/sampleTalents';
+import { collection, onSnapshot, query, doc, deleteDoc } from 'firebase/firestore';
+import { db } from '../../firebase/config';
 
 const ManageTalents = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
+  const [talents, setTalents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  // Fetch talents from Firestore
+  useEffect(() => {
+    const q = query(collection(db, 'talents'));
+    
+    const unsubscribe = onSnapshot(q, 
+      (snapshot) => {
+        const talentsList = snapshot.docs.map(doc => ({
+          ...doc.data(),
+          id: doc.id
+        }));
+        setTalents(talentsList);
+        setLoading(false);
+      },
+      (err) => {
+        console.error('Error fetching talents:', err);
+        setError('Failed to load talents. Please try again later.');
+        setLoading(false);
+      }
+    );
+
+    return () => unsubscribe();
+  }, []);
 
   const filteredTalents = talents.filter(talent =>
     talent.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     talent.talentId.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleDeleteTalent = (talentId) => {
+  const handleDeleteTalent = async (talentId) => {
     if (window.confirm('Are you sure you want to delete this talent?')) {
-      // Here you would typically make an API call to delete the talent
-      console.log('Deleting talent:', talentId);
+      try {
+        await deleteDoc(doc(db, 'talents', talentId));
+      } catch (err) {
+        console.error('Error deleting talent:', err);
+        alert('Failed to delete talent. Please try again.');
+      }
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[var(--color-accent-50)] pt-20 flex items-center justify-center">
+        <div className="flex items-center gap-2">
+          <Icon icon="mdi:loading" className="w-6 h-6 animate-spin text-[var(--color-primary-500)]" />
+          <span className="text-[var(--color-accent-900)]">Loading talents...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[var(--color-accent-50)] pt-20 flex items-center justify-center">
+        <div className="text-red-600">
+          <Icon icon="mdi:alert" className="w-8 h-8 mb-2 mx-auto" />
+          <p>{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[var(--color-accent-50)] pt-20">
@@ -82,11 +135,13 @@ const ManageTalents = () => {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center">
-                      <img
-                        src={talent.profileImage}
-                        alt={talent.name}
-                        className="w-8 h-8 rounded-full mr-3 object-cover"
-                      />
+                      <div className="w-8 h-8 rounded-full mr-3 overflow-hidden bg-[var(--color-accent-100)]">
+                        <img
+                          src={talent.profileImage}
+                          alt={talent.name}
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
                       <span className="text-sm font-medium text-[var(--color-accent-900)]">
                         {talent.name}
                       </span>

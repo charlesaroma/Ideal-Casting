@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
+import { logOut } from '../../firebase/auth';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,6 +13,7 @@ const Navbar = () => {
   });
 
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleStorageChange = (e) => {
@@ -61,6 +63,7 @@ const Navbar = () => {
   const adminNavItems = user?.role === 'admin' ? [
     { path: '/admin', label: 'Dashboard' },
     { path: '/admin/manage-talents', label: 'Manage Talents' },
+    { path: '/admin/booking-requests', label: 'Booking Requests' },
     { path: '/admin/add-talent', label: 'Add Talent' },
   ] : [];
 
@@ -99,10 +102,21 @@ const Navbar = () => {
     };
   }, [dropdownTimeout]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('user');
-    setUser(null);
-    window.location.reload();
+  const handleLogout = async () => {
+    try {
+      const { error } = await logOut();
+      if (error) {
+        console.error('Logout error:', error);
+        return;
+      }
+      // Clear local storage
+      localStorage.removeItem('user');
+      setUser(null);
+      // Navigate to home page
+      navigate('/');
+    } catch (err) {
+      console.error('Logout failed:', err);
+    }
   };
 
   return (
@@ -231,8 +245,8 @@ const Navbar = () => {
             {user ? (
               <div className="flex items-center space-x-3 group">
                 <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 rounded-full bg-[var(--color-secondary-100)] text-[var(--color-secondary-700)] flex items-center justify-center text-xs font-semibold uppercase transform transition-transform group-hover:scale-105">
-                    {getInitials(user.name)}
+                  <div className="w-10 h-8 rounded-full bg-[var(--color-secondary-100)] text-[var(--color-secondary-700)] flex items-center justify-center text-xs font-semibold uppercase transform transition-transform group-hover:scale-105">
+                  {getInitials(user.name)}
                   </div>
                   <span className="text-sm font-medium text-[var(--color-accent-600)]">
                     {user.name}

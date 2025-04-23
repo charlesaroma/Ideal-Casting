@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
+import { signUp } from '../../firebase/auth';
+import { createDocument } from '../../firebase/firestore';
 
 const Signup = ({ onLogin }) => {
   const [formData, setFormData] = useState({
@@ -8,34 +10,89 @@ const Signup = ({ onLogin }) => {
     email: '',
     password: '',
     confirmPassword: '',
+    adminCode: '',
   });
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const ADMIN_SECRET_CODE = 'ADMIN123';
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    setIsLoading(true);
+
     if (formData.password !== formData.confirmPassword) {
-      alert('Passwords do not match!');
+      setError('Passwords do not match!');
+      setIsLoading(false);
       return;
     }
-    const userInfo = {
-      name: formData.name,
-      email: formData.email,
-    };
-    localStorage.setItem('user', JSON.stringify(userInfo));
-    onLogin(userInfo);
-    navigate('/');
-  };
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    try {
+      // Create user with Firebase Auth
+      const { user, error: signUpError } = await signUp(formData.email, formData.password);
+      
+      if (signUpError) {
+        console.error('Firebase Auth Error:', signUpError);
+        setError(signUpError);
+        return;
+      }
+
+      if (user) {
+        // Check if admin code matches
+        const isAdmin = formData.adminCode === ADMIN_SECRET_CODE;
+        console.log('Creating user document for:', user.uid, 'isAdmin:', isAdmin);
+
+        // Create user profile in Firestore
+        const userData = {
+          uid: user.uid,
+          name: formData.name,
+          email: formData.email,
+          role: isAdmin ? 'admin' : 'user',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          phoneNumber: '',
+          address: '',
+          profileImage: '',
+          bio: '',
+          interests: [],
+          lastLogin: new Date().toISOString()
+        };
+
+        console.log('Attempting to create document with data:', userData);
+        const { error: createError } = await createDocument('users', user.uid, userData);
+
+        if (createError) {
+          console.error('Firestore Error:', createError);
+          setError('Failed to create user profile. Please try again. Error: ' + createError);
+          return;
+        }
+
+        console.log('User document created successfully');
+        // Save to localStorage and update app state
+        localStorage.setItem('user', JSON.stringify(userData));
+        onLogin(userData);
+        
+        // Redirect based on role and reload page
+        if (isAdmin) {
+          navigate('/admin');
+          setTimeout(() => window.location.reload(), 100);
+        } else {
+          navigate('/');
+          setTimeout(() => window.location.reload(), 100);
+        }
+      }
+    } catch (err) {
+      console.error('Signup error:', err);
+      setError('Failed to create account. Error: ' + err.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-[var(--color-accent-50)] to-[var(--color-accent-100)]">
-      {/* Background Decorative Elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-1/2 -right-1/2 w-[1000px] h-[1000px] bg-[var(--color-primary-500)]/5 rounded-full"></div>
         <div className="absolute -bottom-1/4 -left-1/4 w-[800px] h-[800px] bg-[var(--color-secondary-500)]/5 rounded-full"></div>
@@ -46,7 +103,7 @@ const Signup = ({ onLogin }) => {
           <div className="text-center mb-8">
             <Link to="/" className="inline-block mb-6">
               <img 
-                src="ideal.png" 
+                src="/ideal.png" 
                 alt="Ideal Casting Logo" 
                 className="h-16 w-auto mx-auto"
               />
@@ -58,6 +115,12 @@ const Signup = ({ onLogin }) => {
               Join our talent network today
             </p>
           </div>
+
+          {error && (
+            <div className="mb-6 p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm">
+              {error}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-4">
@@ -78,7 +141,7 @@ const Signup = ({ onLogin }) => {
                     className="pl-10 w-full px-4 py-3 bg-[var(--color-accent-50)] rounded-xl border border-[var(--color-accent-300)] focus:border-[var(--color-primary-500)] focus:ring-[var(--color-primary-500)] focus:ring-1 focus:outline-none transition-all duration-200"
                     placeholder="Enter your full name"
                     value={formData.name}
-                    onChange={handleChange}
+                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                   />
                 </div>
               </div>
@@ -100,7 +163,7 @@ const Signup = ({ onLogin }) => {
                     className="pl-10 w-full px-4 py-3 bg-[var(--color-accent-50)] rounded-xl border border-[var(--color-accent-300)] focus:border-[var(--color-primary-500)] focus:ring-[var(--color-primary-500)] focus:ring-1 focus:outline-none transition-all duration-200"
                     placeholder="Enter your email"
                     value={formData.email}
-                    onChange={handleChange}
+                    onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                   />
                 </div>
               </div>
@@ -122,7 +185,7 @@ const Signup = ({ onLogin }) => {
                     className="pl-10 w-full px-4 py-3 bg-[var(--color-accent-50)] rounded-xl border border-[var(--color-accent-300)] focus:border-[var(--color-primary-500)] focus:ring-[var(--color-primary-500)] focus:ring-1 focus:outline-none transition-all duration-200"
                     placeholder="Create a password"
                     value={formData.password}
-                    onChange={handleChange}
+                    onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
                   />
                 </div>
               </div>
@@ -144,7 +207,28 @@ const Signup = ({ onLogin }) => {
                     className="pl-10 w-full px-4 py-3 bg-[var(--color-accent-50)] rounded-xl border border-[var(--color-accent-300)] focus:border-[var(--color-primary-500)] focus:ring-[var(--color-primary-500)] focus:ring-1 focus:outline-none transition-all duration-200"
                     placeholder="Confirm your password"
                     value={formData.confirmPassword}
-                    onChange={handleChange}
+                    onChange={(e) => setFormData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="adminCode" className="block text-sm font-medium text-[var(--color-accent-700)] mb-1">
+                  Admin Code (Optional)
+                </label>
+                <div className="relative">
+                  <Icon 
+                    icon="mdi:shield-key-outline" 
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--color-accent-400)] h-5 w-5"
+                  />
+                  <input
+                    id="adminCode"
+                    name="adminCode"
+                    type="password"
+                    className="pl-10 w-full px-4 py-3 bg-[var(--color-accent-50)] rounded-xl border border-[var(--color-accent-300)] focus:border-[var(--color-primary-500)] focus:ring-[var(--color-primary-500)] focus:ring-1 focus:outline-none transition-all duration-200"
+                    placeholder="Enter admin code if you have one"
+                    value={formData.adminCode}
+                    onChange={(e) => setFormData(prev => ({ ...prev, adminCode: e.target.value }))}
                   />
                 </div>
               </div>
@@ -172,10 +256,20 @@ const Signup = ({ onLogin }) => {
 
             <button
               type="submit"
+              disabled={isLoading}
               className="w-full flex items-center justify-center px-4 py-3 border border-transparent text-sm font-medium rounded-xl text-[var(--color-accent-50)] bg-gradient-to-r from-[var(--color-primary-500)] to-[var(--color-primary-600)] hover:from-[var(--color-primary-600)] hover:to-[var(--color-primary-700)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary-500)] transform transition-all duration-200 hover:scale-[1.02] shadow-lg hover:shadow-xl"
             >
-              <span>Create Account</span>
-              <Icon icon="mdi:arrow-right" className="ml-2 h-5 w-5" />
+              {isLoading ? (
+                <>
+                  <Icon icon="mdi:loading" className="w-5 h-5 animate-spin mr-2" />
+                  Creating Account...
+                </>
+              ) : (
+                <>
+                  <span>Create Account</span>
+                  <Icon icon="mdi:arrow-right" className="ml-2 h-5 w-5" />
+                </>
+              )}
             </button>
           </form>
 

@@ -5,11 +5,11 @@ const TalentCard = ({ talent }) => {
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group">
       {/* Image Container */}
-      <div className="relative aspect-[4/3] overflow-hidden">
+      <div className="relative w-full h-[250px]">
         <img
           src={talent.profileImage}
           alt={`${talent.talentId} - ${talent.primaryRole}`}
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          className="w-full h-full object-contain bg-[var(--color-accent-100)]"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-accent-900)]/80 to-transparent transition-opacity duration-300 group-hover:opacity-90" />
         
@@ -26,7 +26,7 @@ const TalentCard = ({ talent }) => {
         <div className="mb-4">
           <h4 className="text-sm font-semibold text-[var(--color-accent-600)] mb-2">Skills</h4>
           <div className="flex flex-wrap gap-2">
-            {talent.skills.slice(0, 3).map((skill) => (
+            {talent.skills.map((skill) => (
               <span
                 key={skill}
                 className="px-2 py-1 bg-[var(--color-accent-100)] text-[var(--color-accent-700)] text-xs rounded-full"
@@ -34,9 +34,9 @@ const TalentCard = ({ talent }) => {
                 {skill}
               </span>
             ))}
-            {talent.skills.length > 3 && (
+            {talent.moreSkills && (
               <span className="px-2 py-1 bg-[var(--color-accent-100)] text-[var(--color-accent-700)] text-xs rounded-full">
-                +{talent.skills.length - 3} more
+                {talent.moreSkills}
               </span>
             )}
           </div>

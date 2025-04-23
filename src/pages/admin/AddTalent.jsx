@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 import { talentCategories, skillsList } from '../../data/sampleTalents';
+import { collection, doc, setDoc } from 'firebase/firestore';
+import { db } from '../../firebase/config';
 
 const AddTalent = () => {
   const navigate = useNavigate();
@@ -15,15 +17,64 @@ const AddTalent = () => {
     experience: '',
     availability: 'Available',
     skills: [],
-    profileImage: '',
+    profileImageUrl: '',
   });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [imagePreview, setImagePreview] = useState(null);
 
-  const handleSubmit = (e) => {
+  const handleImageUrlChange = (e) => {
+    const url = e.target.value;
+    setFormData(prev => ({ ...prev, profileImageUrl: url }));
+    setImagePreview(url);
+  };
+
+  const validateImageUrl = (url) => {
+    if (!url) return false;
+    // Basic URL validation for image files
+    const imageUrlPattern = /^https?:\/\/.*\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i;
+    return imageUrlPattern.test(url);
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Here you would typically make an API call to add the talent
-    console.log('Adding new talent:', formData);
-    // Navigate back to talent directory after successful addition
-    navigate('/talent-directory');
+    setIsLoading(true);
+    setError('');
+
+    try {
+      // Validate image URL if provided
+      if (formData.profileImageUrl && !validateImageUrl(formData.profileImageUrl)) {
+        throw new Error('Please enter a valid image URL (jpg, jpeg, png, gif, or webp)');
+      }
+
+      // Create talent document in Firestore
+      const talentData = {
+        name: formData.name,
+        talentId: formData.talentId,
+        primaryRole: formData.primaryRole,
+        gender: formData.gender,
+        age: Number(formData.age),
+        location: formData.location,
+        experience: Number(formData.experience),
+        availability: formData.availability,
+        skills: formData.skills,
+        profileImage: formData.profileImageUrl,
+        rating: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      // Use setDoc with merge option to ensure we don't overwrite existing data
+      await setDoc(doc(db, 'talents', formData.talentId), talentData, { merge: true });
+
+      // Navigate to talent directory after successful addition
+      navigate('/talent-directory');
+    } catch (err) {
+      console.error('Error adding talent:', err);
+      setError(err.message || 'Failed to add talent. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSkillToggle = (skill) => {
@@ -51,6 +102,12 @@ const AddTalent = () => {
               Back
             </button>
           </div>
+
+          {error && (
+            <div className="mb-6 p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm">
+              {error}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-lg p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -99,6 +156,44 @@ const AddTalent = () => {
                       </option>
                     ))}
                   </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[var(--color-accent-700)] mb-1">
+                    Profile Image URL
+                  </label>
+                  <div className="space-y-2">
+                    <input
+                      type="url"
+                      placeholder="Enter ImageKit URL"
+                      value={formData.profileImageUrl}
+                      onChange={handleImageUrlChange}
+                      className="w-full p-2 border border-[var(--color-accent-200)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]"
+                    />
+                    {imagePreview && (
+                      <div className="relative w-32 h-32">
+                        <img
+                          src={imagePreview}
+                          alt="Profile preview"
+                          className="w-full h-full object-cover rounded-lg"
+                          onError={() => {
+                            setError('Invalid image URL. Please check the URL and try again.');
+                            setImagePreview(null);
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setImagePreview(null);
+                            setFormData(prev => ({ ...prev, profileImageUrl: '' }));
+                          }}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                        >
+                          <Icon icon="mdi:close" className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -151,6 +246,21 @@ const AddTalent = () => {
                     <option value="Jinja">Jinja</option>
                   </select>
                 </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[var(--color-accent-700)] mb-1">
+                    Experience (years)
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    min="0"
+                    max="50"
+                    value={formData.experience}
+                    onChange={(e) => setFormData(prev => ({ ...prev, experience: e.target.value }))}
+                    className="w-full p-2 border border-[var(--color-accent-200)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]"
+                  />
+                </div>
               </div>
             </div>
 
@@ -181,9 +291,20 @@ const AddTalent = () => {
             <div className="mt-8 flex justify-end">
               <button
                 type="submit"
-                className="px-6 py-2 bg-[var(--color-primary-500)] text-white rounded-lg hover:bg-[var(--color-primary-600)] transition-colors duration-200"
+                disabled={isLoading}
+                className="px-6 py-2 bg-[var(--color-primary-500)] text-white rounded-lg hover:bg-[var(--color-primary-600)] transition-colors duration-200 flex items-center gap-2"
               >
-                Add Talent
+                {isLoading ? (
+                  <>
+                    <Icon icon="mdi:loading" className="w-5 h-5 animate-spin" />
+                    Adding Talent...
+                  </>
+                ) : (
+                  <>
+                    <Icon icon="mdi:plus" className="w-5 h-5" />
+                    Add Talent
+                  </>
+                )}
               </button>
             </div>
           </form>

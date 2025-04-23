@@ -1,10 +1,15 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 import TalentCard from '../components/talent/TalentCard';
-import { talents, talentCategories, skillsList } from '../data/sampleTalents';
+import { talentCategories, skillsList } from '../data/sampleTalents';
+import { collection, onSnapshot, query, deleteDoc, doc } from 'firebase/firestore';
+import { db } from '../firebase/config';
 
 const TalentDirectory = ({ isAdmin }) => {
+  const [talents, setTalents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedSkills, setSelectedSkills] = useState([]);
@@ -16,6 +21,29 @@ const TalentDirectory = ({ isAdmin }) => {
     availability: '',
   });
   const [showFilters, setShowFilters] = useState(false);
+
+  // Fetch talents from Firestore
+  useEffect(() => {
+    const q = query(collection(db, 'talents'));
+    
+    const unsubscribe = onSnapshot(q, 
+      (snapshot) => {
+        const talentsList = snapshot.docs.map(doc => ({
+          ...doc.data(),
+          id: doc.id
+        }));
+        setTalents(talentsList);
+        setLoading(false);
+      },
+      (err) => {
+        console.error('Error fetching talents:', err);
+        setError('Failed to load talents. Please try again later.');
+        setLoading(false);
+      }
+    );
+
+    return () => unsubscribe();
+  }, []);
 
   // Filter talents based on search and filters
   const filteredTalents = useMemo(() => {
@@ -80,7 +108,7 @@ const TalentDirectory = ({ isAdmin }) => {
         experienceMatch()
       );
     });
-  }, [searchTerm, selectedCategory, selectedSkills, filters]);
+  }, [searchTerm, selectedCategory, selectedSkills, filters, talents]);
 
   const handleSkillToggle = (skill) => {
     setSelectedSkills((prev) =>
@@ -91,12 +119,38 @@ const TalentDirectory = ({ isAdmin }) => {
   };
 
   // Admin Actions
-  const handleDeleteTalent = (talentId) => {
+  const handleDeleteTalent = async (talentId) => {
     if (window.confirm('Are you sure you want to delete this talent?')) {
-      // Here you would typically make an API call to delete the talent
-      console.log('Deleting talent:', talentId);
+      try {
+        await deleteDoc(doc(db, 'talents', talentId));
+      } catch (err) {
+        console.error('Error deleting talent:', err);
+        alert('Failed to delete talent. Please try again.');
+      }
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[var(--color-accent-50)] pt-20 flex items-center justify-center">
+        <div className="flex items-center gap-2">
+          <Icon icon="mdi:loading" className="w-6 h-6 animate-spin text-[var(--color-primary-500)]" />
+          <span className="text-[var(--color-accent-900)]">Loading talents...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[var(--color-accent-50)] pt-20 flex items-center justify-center">
+        <div className="text-red-600">
+          <Icon icon="mdi:alert" className="w-8 h-8 mb-2 mx-auto" />
+          <p>{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[var(--color-accent-50)] pt-20">

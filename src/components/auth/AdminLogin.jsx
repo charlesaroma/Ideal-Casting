@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
+import { signIn } from '../../firebase/auth';
+import { getDocument } from '../../firebase/firestore';
 
 const AdminLogin = ({ onLogin }) => {
   const navigate = useNavigate();
@@ -11,50 +13,50 @@ const AdminLogin = ({ onLogin }) => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    setError('');
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
     try {
-      // Get admin users from localStorage
-      const adminUsers = JSON.parse(localStorage.getItem('adminUsers') || '[]');
+      // Sign in with Firebase Auth
+      const { user, error: signInError } = await signIn(formData.email, formData.password);
       
-      // Find matching admin
-      const admin = adminUsers.find(
-        user => user.email === formData.email && user.password === formData.password
-      );
-
-      if (!admin) {
-        setError('Invalid email or password');
-        setIsLoading(false);
+      if (signInError) {
+        setError(signInError);
         return;
       }
 
-      // Create user object for authentication
-      const userObj = {
-        id: admin.id,
-        name: admin.name,
-        email: admin.email,
-        role: 'admin'
-      };
+      if (user) {
+        // Check if user is admin in Firestore
+        const { data: userData, error: userError } = await getDocument('users', user.uid);
+        
+        if (userError || !userData) {
+          setError('User not found');
+          return;
+        }
 
-      // Save to localStorage and update app state
-      localStorage.setItem('user', JSON.stringify(userObj));
-      onLogin(userObj);
+        if (userData.role !== 'admin') {
+          setError('Unauthorized access. Admin privileges required.');
+          return;
+        }
 
-      // Redirect to admin dashboard
-      navigate('/admin');
-    } catch (error) {
+        // Create user object for authentication
+        const adminData = {
+          uid: user.uid,
+          name: userData.name,
+          email: user.email,
+          role: 'admin'
+        };
+
+        // Save to localStorage and update app state
+        localStorage.setItem('user', JSON.stringify(adminData));
+        onLogin(adminData);
+
+        // Redirect to admin dashboard
+        navigate('/admin');
+      }
+    } catch (err) {
       setError('An error occurred. Please try again.');
     } finally {
       setIsLoading(false);
@@ -91,7 +93,7 @@ const AdminLogin = ({ onLogin }) => {
                   name="email"
                   required
                   value={formData.email}
-                  onChange={handleInputChange}
+                  onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                   className="w-full p-2 border border-[var(--color-accent-200)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]"
                   placeholder="Enter your email"
                 />
@@ -106,7 +108,7 @@ const AdminLogin = ({ onLogin }) => {
                   name="password"
                   required
                   value={formData.password}
-                  onChange={handleInputChange}
+                  onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
                   className="w-full p-2 border border-[var(--color-accent-200)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]"
                   placeholder="Enter your password"
                 />

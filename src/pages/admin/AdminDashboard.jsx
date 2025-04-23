@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Icon } from '@iconify/react';
+import { signUp } from '../../firebase/auth';
+import { createDocument } from '../../firebase/firestore';
 
 const AdminDashboard = () => {
   const [showCreateAdmin, setShowCreateAdmin] = useState(false);
@@ -12,6 +14,7 @@ const AdminDashboard = () => {
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const adminActions = [
     {
@@ -44,66 +47,86 @@ const AdminDashboard = () => {
     e.preventDefault();
     setError('');
     setSuccess('');
+    setIsLoading(true);
 
     // Basic validation
     if (!formData.email || !formData.password || !formData.confirmPassword || !formData.name) {
       setError('All fields are required');
+      setIsLoading(false);
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
+      setIsLoading(false);
       return;
     }
 
     if (formData.password.length < 6) {
       setError('Password must be at least 6 characters long');
+      setIsLoading(false);
       return;
     }
 
     try {
-      // Get existing admins or initialize empty array
-      const existingAdmins = JSON.parse(localStorage.getItem('adminUsers') || '[]');
+      // Create user in Firebase Auth
+      const { user, error: signUpError } = await signUp(formData.email, formData.password);
       
-      // Check if email already exists
-      if (existingAdmins.some(admin => admin.email === formData.email)) {
-        setError('An admin with this email already exists');
+      if (signUpError) {
+        console.error('Firebase Auth Error:', signUpError);
+        setError(signUpError);
+        setIsLoading(false);
         return;
       }
 
-      // Create new admin user object
-      const newAdmin = {
-        id: Date.now().toString(),
-        name: formData.name,
-        email: formData.email,
-        password: formData.password, // In a real app, this should be hashed
-        role: 'admin',
-        createdAt: new Date().toISOString()
-      };
+      if (user) {
+        // Create admin profile in Firestore
+        const adminData = {
+          uid: user.uid,
+          name: formData.name,
+          email: formData.email,
+          role: 'admin',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          phoneNumber: '',
+          address: '',
+          profileImage: '',
+          bio: '',
+          interests: [],
+          lastLogin: new Date().toISOString()
+        };
 
-      // Add new admin to the list
-      const updatedAdmins = [...existingAdmins, newAdmin];
-      
-      // Save to localStorage
-      localStorage.setItem('adminUsers', JSON.stringify(updatedAdmins));
-      
-      // Reset form
-      setFormData({
-        email: '',
-        password: '',
-        confirmPassword: '',
-        name: ''
-      });
-      
-      setSuccess('Admin user created successfully! They can now log in using these credentials.');
-      
-      // Hide the form after successful creation
-      setTimeout(() => {
-        setShowCreateAdmin(false);
-        setSuccess('');
-      }, 3000);
+        console.log('Creating admin document for:', user.uid);
+        const { error: createError } = await createDocument('users', user.uid, adminData);
+
+        if (createError) {
+          console.error('Firestore Error:', createError);
+          setError('Failed to create admin profile. Error: ' + createError);
+          setIsLoading(false);
+          return;
+        }
+
+        // Reset form
+        setFormData({
+          email: '',
+          password: '',
+          confirmPassword: '',
+          name: ''
+        });
+        
+        setSuccess('Admin user created successfully! They can now log in using these credentials.');
+        
+        // Hide the form after successful creation
+        setTimeout(() => {
+          setShowCreateAdmin(false);
+          setSuccess('');
+        }, 3000);
+      }
     } catch (error) {
-      setError('Failed to create admin user. Please try again.');
+      console.error('Admin creation error:', error);
+      setError('Failed to create admin user. Error: ' + error.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -206,9 +229,17 @@ const AdminDashboard = () => {
                 <div className="flex justify-end">
                   <button
                     type="submit"
-                    className="w-full sm:w-auto px-6 py-2 bg-[var(--color-primary-500)] text-white rounded-lg hover:bg-[var(--color-primary-600)] transition-colors duration-200"
+                    disabled={isLoading}
+                    className="w-full sm:w-auto px-6 py-2 bg-[var(--color-primary-500)] text-white rounded-lg hover:bg-[var(--color-primary-600)] transition-colors duration-200 disabled:bg-[var(--color-accent-400)] disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
-                    Create Admin User
+                    {isLoading ? (
+                      <>
+                        <Icon icon="mdi:loading" className="w-5 h-5 animate-spin" />
+                        Creating...
+                      </>
+                    ) : (
+                      'Create Admin User'
+                    )}
                   </button>
                 </div>
               </form>
