@@ -67,8 +67,8 @@ const TalentShowcase = () => {
       <div className="flex flex-col min-h-screen bg-[var(--color-accent-50)]">
         <div className="flex-grow flex items-center justify-center">
           <div className="flex items-center gap-2">
-            <Icon icon="mdi:loading" className="w-6 h-6 animate-spin text-[var(--color-primary-500)]" />
-            <span className="text-[var(--color-accent-900)]">Loading...</span>
+            <Icon icon="mdi:loading" className="w-5 h-5 sm:w-6 sm:h-6 animate-spin text-[var(--color-primary-500)]" />
+            <span className="text-sm sm:text-base text-[var(--color-accent-900)]">Loading...</span>
           </div>
         </div>
       </div>
@@ -79,7 +79,7 @@ const TalentShowcase = () => {
     <div className="flex flex-col min-h-screen bg-[var(--color-accent-50)]">
       <div className="flex-grow">
         {/* Hero Section */}
-        <section className="relative h-[60vh] flex items-center justify-center overflow-hidden">
+        <section className="relative h-[40vh] sm:h-[50vh] md:h-[60vh] flex items-center justify-center overflow-hidden">
           <div className="absolute inset-0 z-0">
             <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-accent-900)]/90 to-[var(--color-primary-900)]/90 z-10" />
             <video
@@ -92,17 +92,17 @@ const TalentShowcase = () => {
               <source src="/videos/showcase-hero.mp4" type="video/mp4" />
             </video>
           </div>
-          <div className="relative z-20 text-center px-6 sm:px-12 lg:px-24">
+          <div className="relative z-20 text-center px-4 sm:px-6 lg:px-24">
             <div className="max-w-[1920px] mx-auto">
-              <h1 className="text-4xl md:text-6xl font-bold text-[var(--color-accent-200)] mb-6">
+              <h1 className="text-2xl sm:text-4xl md:text-6xl font-bold text-[var(--color-accent-200)] mb-4 sm:mb-6">
                 Featured <span className="text-[var(--color-primary-500)]">Talents</span>
               </h1>
-              <p className="text-xl text-[var(--color-accent-100)] max-w-3xl mx-auto mb-8">
+              <p className="text-sm sm:text-base md:text-xl text-[var(--color-accent-100)] max-w-3xl mx-auto mb-6 sm:mb-8">
                 Meet our highest-rated performers who are making waves in the industry
               </p>
               <Link
                 to="/talent-directory"
-                className="inline-block px-8 py-4 bg-[var(--color-primary-500)] text-[var(--color-accent-200)] rounded-lg font-semibold hover:bg-[var(--color-primary-600)] transition-colors duration-200"
+                className="inline-block px-4 sm:px-8 py-2 sm:py-4 bg-[var(--color-primary-500)] text-[var(--color-accent-200)] text-sm sm:text-base rounded-lg font-semibold hover:bg-[var(--color-primary-600)] transition-colors duration-200"
               >
                 Explore Full Directory
               </Link>
@@ -111,30 +111,30 @@ const TalentShowcase = () => {
         </section>
 
         {/* Top Rated Talents Section */}
-        <section className="py-16">
-          <div className="px-6 sm:px-12 lg:px-24">
+        <section className="py-8 sm:py-12 md:py-16">
+          <div className="px-4 sm:px-6 lg:px-24">
             <div className="max-w-[1920px] mx-auto">
-              <div className="flex justify-between items-center mb-12">
-                <h2 className="text-xl sm:text-lg md:text-2xl lg:text-3xl font-bold text-[var(--color-accent-900)]">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-8 sm:mb-12">
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-[var(--color-accent-900)]">
                   Top Rated Talents
                 </h2>
                 <Link 
                   to="/talent-directory"
-                  className="text-[var(--color-primary-500)] hover:text-[var(--color-primary-600)] font-semibold flex items-center gap-2"
+                  className="text-sm sm:text-base text-[var(--color-primary-500)] hover:text-[var(--color-primary-600)] font-semibold flex items-center gap-2"
                 >
                   View All
-                  <Icon icon="mdi:arrow-right" className="w-5 h-5" />
+                  <Icon icon="mdi:arrow-right" className="w-4 h-4 sm:w-5 sm:h-5" />
                 </Link>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
                 {topTalents.map((talent) => (
                   <div
                     key={talent.id}
                     className="group relative bg-[var(--color-accent-200)] rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 flex flex-col pb-4"
                   >
                     {/* Image and Gradient Overlay */}
-                    <div className="relative h-48 overflow-hidden">
+                    <div className="relative h-40 sm:h-48 md:h-56 overflow-hidden">
                       <img
                         src={talent.profileImage}
                         alt={`${talent.name}`}
@@ -144,35 +144,35 @@ const TalentShowcase = () => {
                     </div>
 
                     {/* Content */}
-                    <div className="flex-grow p-6 flex flex-col justify-between">
+                    <div className="flex-grow p-4 sm:p-6 flex flex-col justify-between">
                       <div>
                         {/* Name and Role */}
-                        <h3 className="text-xl font-bold text-[var(--color-accent-900)] mb-1">
+                        <h3 className="text-lg sm:text-xl font-bold text-[var(--color-accent-900)] mb-1">
                           {talent.name}
                         </h3>
-                        <p className="text-[var(--color-primary-600)] font-medium mb-2">
+                        <p className="text-sm sm:text-base text-[var(--color-primary-600)] font-medium mb-2">
                           {talent.primaryRole}
                         </p>
-                        <p className="text-sm text-[var(--color-accent-600)] mb-4">
+                        <p className="text-xs sm:text-sm text-[var(--color-accent-600)] mb-4">
                           ID: {talent.talentId}
                         </p>
 
                         {/* Skills */}
                         <div className="mb-4">
-                          <h4 className="text-sm font-medium text-[var(--color-accent-600)] mb-2">
+                          <h4 className="text-xs sm:text-sm font-medium text-[var(--color-accent-600)] mb-2">
                             Skills
                           </h4>
-                          <div className="flex flex-wrap gap-2">
+                          <div className="flex flex-wrap gap-1 sm:gap-2">
                             {talent.skills.slice(0, 2).map((skill, index) => (
                               <span
                                 key={index}
-                                className="text-sm bg-[var(--color-accent-100)] text-[var(--color-accent-700)] px-3 py-1 rounded-full"
+                                className="text-xs bg-[var(--color-accent-100)] text-[var(--color-accent-700)] px-2 py-0.5 sm:py-1 rounded-full"
                               >
                                 {skill}
                               </span>
                             ))}
                             {talent.skills.length > 2 && (
-                              <span className="text-sm text-[var(--color-accent-600)]">
+                              <span className="text-xs text-[var(--color-accent-600)]">
                                 +{talent.skills.length - 2} more
                               </span>
                             )}
@@ -180,30 +180,30 @@ const TalentShowcase = () => {
                         </div>
 
                         {/* Location and Rating */}
-                        <div className="flex items-center gap-4 mb-4">
+                        <div className="flex items-center gap-2 sm:gap-4 mb-4">
                           <div className="flex items-center gap-1">
-                            <Icon icon="mdi:map-marker" className="text-[var(--color-primary-500)]" />
-                            <span className="text-sm text-[var(--color-accent-700)]">
+                            <Icon icon="mdi:map-marker" className="text-[var(--color-primary-500)] w-4 h-4" />
+                            <span className="text-xs sm:text-sm text-[var(--color-accent-700)]">
                               {talent.location}
                             </span>
                           </div>
                           <div className="flex items-center gap-1">
-                            <Icon icon="mdi:star" className="text-[var(--color-primary-500)]" />
-                            <span className="text-sm text-[var(--color-accent-700)]">
+                            <Icon icon="mdi:star" className="text-[var(--color-primary-500)] w-4 h-4" />
+                            <span className="text-xs sm:text-sm text-[var(--color-accent-700)]">
                               {talent.rating.toFixed(1)}
                             </span>
                           </div>
                         </div>
 
                         {/* Experience and Availability */}
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2 sm:gap-4">
                           <div className="flex items-center gap-1">
-                            <Icon icon="mdi:clock-outline" className="text-[var(--color-primary-500)]" />
-                            <span className="text-sm text-[var(--color-accent-700)]">
+                            <Icon icon="mdi:clock-outline" className="text-[var(--color-primary-500)] w-4 h-4" />
+                            <span className="text-xs sm:text-sm text-[var(--color-accent-700)]">
                               {talent.experience} years
                             </span>
                           </div>
-                          <span className={`text-sm px-2 py-0.5 rounded ${
+                          <span className={`text-xs sm:text-sm px-2 py-0.5 rounded ${
                             talent.availability === 'Available' 
                               ? 'bg-green-100 text-green-700'
                               : 'bg-red-100 text-red-700'
@@ -218,7 +218,7 @@ const TalentShowcase = () => {
                         <div className="flex items-center gap-2">
                           <Link
                             to={`/talent/${talent.talentId}`}
-                            className="flex-1 bg-[var(--color-primary-500)] text-[var(--color-accent-200)] px-4 py-2 rounded-lg font-medium hover:bg-[var(--color-primary-600)] transition-colors duration-200 text-center"
+                            className="flex-1 bg-[var(--color-primary-500)] text-[var(--color-accent-200)] px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium hover:bg-[var(--color-primary-600)] transition-colors duration-200 text-center text-xs sm:text-sm"
                           >
                             View Profile
                           </Link>
@@ -233,39 +233,39 @@ const TalentShowcase = () => {
         </section>
 
         {/* Success Stories Section */}
-        <section className="py-16 bg-[var(--color-accent-900)]">
-          <div className="px-6 sm:px-12 lg:px-24">
+        <section className="py-8 sm:py-12 md:py-16 bg-[var(--color-accent-900)]">
+          <div className="px-4 sm:px-6 lg:px-24">
             <div className="max-w-[1920px] mx-auto">
-              <h2 className="text-3xl font-bold text-[var(--color-accent-200)] text-center mb-12">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-[var(--color-accent-200)] text-center mb-8 sm:mb-12">
                 Recent Success Stories
               </h2>
-              <div className="grid md:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
                 {successStories.map((story) => (
                   <div
                     key={story.id}
-                    className="bg-[var(--color-accent-200)] rounded-lg p-6 shadow-lg"
+                    className="bg-[var(--color-accent-200)] rounded-lg p-4 sm:p-6 shadow-lg"
                   >
-                    <div className="flex items-center gap-4 mb-4">
+                    <div className="flex items-center gap-3 sm:gap-4 mb-4">
                       <img
                         src={story.image}
                         alt={story.author}
-                        className="w-16 h-16 rounded-full object-cover"
+                        className="w-12 h-12 sm:w-16 sm:h-16 rounded-full object-cover"
                       />
                       <div>
-                        <h3 className="font-semibold text-[var(--color-accent-900)]">
+                        <h3 className="text-sm sm:text-base font-semibold text-[var(--color-accent-900)]">
                           {story.author}
                         </h3>
-                        <p className="text-sm text-[var(--color-accent-600)]">
+                        <p className="text-xs sm:text-sm text-[var(--color-accent-600)]">
                           {story.role}
                         </p>
                       </div>
                     </div>
-                    <div className="mb-4 px-4 py-2 bg-[var(--color-primary-500)]/10 rounded-lg">
-                      <p className="text-sm font-semibold text-[var(--color-primary-700)]">
+                    <div className="mb-4 px-3 sm:px-4 py-2 bg-[var(--color-primary-500)]/10 rounded-lg">
+                      <p className="text-xs sm:text-sm font-semibold text-[var(--color-primary-700)]">
                         {story.achievement}
                       </p>
                     </div>
-                    <blockquote className="text-[var(--color-accent-700)] italic">
+                    <blockquote className="text-xs sm:text-sm text-[var(--color-accent-700)] italic">
                       "{story.quote}"
                     </blockquote>
                   </div>
@@ -276,25 +276,25 @@ const TalentShowcase = () => {
         </section>
 
         {/* CTA Section */}
-        <section className="py-16 bg-[var(--color-primary-500)]">
-          <div className="px-6 sm:px-12 lg:px-24">
+        <section className="py-8 sm:py-12 md:py-16 bg-[var(--color-primary-500)]">
+          <div className="px-4 sm:px-6 lg:px-24">
             <div className="max-w-[1920px] mx-auto text-center">
-              <h2 className="text-3xl font-bold text-[var(--color-accent-200)] mb-6">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-[var(--color-accent-200)] mb-4 sm:mb-6">
                 Ready to Discover More Talent?
               </h2>
-              <p className="text-xl text-[var(--color-accent-100)] mb-8 max-w-2xl mx-auto">
+              <p className="text-sm sm:text-base md:text-xl text-[var(--color-accent-100)] mb-6 sm:mb-8 max-w-2xl mx-auto">
                 Browse our complete directory of exceptional performers
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
                   to="/talent-directory"
-                  className="px-8 py-4 bg-[var(--color-accent-200)] text-[var(--color-primary-500)] rounded-lg font-semibold hover:bg-[var(--color-accent-50)] transition-colors duration-200"
+                  className="px-4 sm:px-8 py-2 sm:py-4 bg-[var(--color-accent-200)] text-[var(--color-primary-500)] text-sm sm:text-base rounded-lg font-semibold hover:bg-[var(--color-accent-50)] transition-colors duration-200"
                 >
                   View Full Directory
                 </Link>
                 <Link
                   to="/contact"
-                  className="px-8 py-4 bg-transparent border-2 border-[var(--color-accent-200)] text-[var(--color-accent-200)] rounded-lg font-semibold hover:bg-[var(--color-accent-200)]/10 transition-colors duration-200"
+                  className="px-4 sm:px-8 py-2 sm:py-4 bg-transparent border-2 border-[var(--color-accent-200)] text-[var(--color-accent-200)] text-sm sm:text-base rounded-lg font-semibold hover:bg-[var(--color-accent-200)]/10 transition-colors duration-200"
                 >
                   Contact Us
                 </Link>

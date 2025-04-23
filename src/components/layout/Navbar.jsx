@@ -38,7 +38,16 @@ const Navbar = () => {
     };
   }, [user]);
 
-  const navStructure = [
+  const navStructure = user?.role === 'admin' ? [
+    { path: '/admin', label: 'Dashboard' },
+    {
+      label: 'Talent',
+      items: [
+        { path: '/talent-showcase', label: 'Talent Showcase' },
+        { path: '/talent-directory', label: 'Talent Directory' },
+      ],
+    },
+  ] : [
     { path: '/', label: 'Home' },
     {
       label: 'About',
@@ -61,7 +70,6 @@ const Navbar = () => {
 
   // Add admin navigation items if user is admin
   const adminNavItems = user?.role === 'admin' ? [
-    { path: '/admin', label: 'Dashboard' },
     { path: '/admin/manage-talents', label: 'Manage Talents' },
     { path: '/admin/booking-requests', label: 'Booking Requests' },
     { path: '/admin/add-talent', label: 'Add Talent' },
