@@ -1,30 +1,63 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 
 const AdminLogin = ({ onLogin }) => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
-    password: '',
+    password: ''
   });
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    setError('');
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (formData.email === 'admin@example.com' && formData.password === 'admin123') {
-      const adminUser = {
-        name: 'Admin User',
-        email: formData.email,
+    setError('');
+    setIsLoading(true);
+
+    try {
+      // Get admin users from localStorage
+      const adminUsers = JSON.parse(localStorage.getItem('adminUsers') || '[]');
+      
+      // Find matching admin
+      const admin = adminUsers.find(
+        user => user.email === formData.email && user.password === formData.password
+      );
+
+      if (!admin) {
+        setError('Invalid email or password');
+        setIsLoading(false);
+        return;
+      }
+
+      // Create user object for authentication
+      const userObj = {
+        id: admin.id,
+        name: admin.name,
+        email: admin.email,
         role: 'admin'
       };
-      
-      localStorage.setItem('user', JSON.stringify(adminUser));
-      await onLogin(adminUser);
-      
-      window.location.href = '/admin';
-    } else {
-      alert('Invalid admin credentials');
+
+      // Save to localStorage and update app state
+      localStorage.setItem('user', JSON.stringify(userObj));
+      onLogin(userObj);
+
+      // Redirect to admin dashboard
+      navigate('/admin');
+    } catch (error) {
+      setError('An error occurred. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -32,13 +65,21 @@ const AdminLogin = ({ onLogin }) => {
     <div className="min-h-screen bg-[var(--color-accent-50)] pt-20">
       <div className="container-custom py-8">
         <div className="max-w-md mx-auto">
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <div className="flex items-center justify-center mb-6">
-              <Icon icon="mdi:shield-lock" className="w-12 h-12 text-[var(--color-primary-500)]" />
+          <div className="bg-white rounded-xl shadow-lg p-6 space-y-6">
+            <div className="text-center">
+              <h1 className="text-2xl font-bold text-[var(--color-accent-900)]">
+                Admin Login
+              </h1>
+              <p className="mt-2 text-[var(--color-accent-600)]">
+                Sign in to access the admin dashboard
+              </p>
             </div>
-            <h1 className="text-2xl font-bold text-[var(--color-accent-900)] mb-6 text-center">
-              Admin Login
-            </h1>
+
+            {error && (
+              <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm">
+                {error}
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
@@ -47,11 +88,12 @@ const AdminLogin = ({ onLogin }) => {
                 </label>
                 <input
                   type="email"
+                  name="email"
                   required
                   value={formData.email}
-                  onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                  onChange={handleInputChange}
                   className="w-full p-2 border border-[var(--color-accent-200)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]"
-                  placeholder="Enter admin email"
+                  placeholder="Enter your email"
                 />
               </div>
 
@@ -61,20 +103,39 @@ const AdminLogin = ({ onLogin }) => {
                 </label>
                 <input
                   type="password"
+                  name="password"
                   required
                   value={formData.password}
-                  onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+                  onChange={handleInputChange}
                   className="w-full p-2 border border-[var(--color-accent-200)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]"
-                  placeholder="Enter admin password"
+                  placeholder="Enter your password"
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full py-2 px-4 bg-[var(--color-primary-500)] text-white rounded-lg hover:bg-[var(--color-primary-600)] transition-colors duration-200"
+                disabled={isLoading}
+                className="w-full py-2 px-4 bg-[var(--color-primary-500)] text-white rounded-lg hover:bg-[var(--color-primary-600)] transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                Login as Admin
+                {isLoading ? (
+                  <>
+                    <Icon icon="mdi:loading" className="w-5 h-5 animate-spin" />
+                    Signing in...
+                  </>
+                ) : (
+                  'Sign In'
+                )}
               </button>
+
+              <div className="text-center text-sm text-[var(--color-accent-600)]">
+                Not an admin?{' '}
+                <Link
+                  to="/login"
+                  className="text-[var(--color-primary-500)] hover:text-[var(--color-primary-600)]"
+                >
+                  Regular login
+                </Link>
+              </div>
             </form>
           </div>
         </div>

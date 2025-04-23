@@ -62,9 +62,30 @@ const AdminDashboard = () => {
     }
 
     try {
-      // Here you would typically make an API call to create the admin user
-      // For now, we'll just simulate success
-      console.log('Creating admin user:', { email: formData.email, name: formData.name });
+      // Get existing admins or initialize empty array
+      const existingAdmins = JSON.parse(localStorage.getItem('adminUsers') || '[]');
+      
+      // Check if email already exists
+      if (existingAdmins.some(admin => admin.email === formData.email)) {
+        setError('An admin with this email already exists');
+        return;
+      }
+
+      // Create new admin user object
+      const newAdmin = {
+        id: Date.now().toString(),
+        name: formData.name,
+        email: formData.email,
+        password: formData.password, // In a real app, this should be hashed
+        role: 'admin',
+        createdAt: new Date().toISOString()
+      };
+
+      // Add new admin to the list
+      const updatedAdmins = [...existingAdmins, newAdmin];
+      
+      // Save to localStorage
+      localStorage.setItem('adminUsers', JSON.stringify(updatedAdmins));
       
       // Reset form
       setFormData({
@@ -73,7 +94,8 @@ const AdminDashboard = () => {
         confirmPassword: '',
         name: ''
       });
-      setSuccess('Admin user created successfully!');
+      
+      setSuccess('Admin user created successfully! They can now log in using these credentials.');
       
       // Hide the form after successful creation
       setTimeout(() => {
