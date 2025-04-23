@@ -16,19 +16,18 @@ const Navbar = () => {
   useEffect(() => {
     const handleStorageChange = (e) => {
       if (e.key === 'user') {
-        window.location.reload();
+        const savedUser = localStorage.getItem('user');
+        setUser(savedUser ? JSON.parse(savedUser) : null);
       }
     };
 
     window.addEventListener('storage', handleStorageChange);
-
-    // Check for initial login/signup
+    
     const savedUser = localStorage.getItem('user');
     if (savedUser) {
       const currentUser = JSON.parse(savedUser);
       if (JSON.stringify(currentUser) !== JSON.stringify(user)) {
         setUser(currentUser);
-        window.location.reload();
       }
     }
 
@@ -58,13 +57,21 @@ const Navbar = () => {
     { path: '/contact', label: 'Contact' },
   ];
 
+  // Add admin navigation items if user is admin
+  const adminNavItems = user?.role === 'admin' ? [
+    { path: '/admin', label: 'Dashboard' },
+    { path: '/admin/manage-talents', label: 'Manage Talents' },
+    { path: '/admin/add-talent', label: 'Add Talent' },
+  ] : [];
+
   const isActive = (path) => location.pathname === path;
 
   const getInitials = (name) => {
     if (!name) return '';
     return name
       .split(' ')
-      .map((n) => n[0])
+      .filter(n => n) // Filter out empty strings
+      .map(n => n[0] || '')
       .join('')
       .toUpperCase();
   };
@@ -171,9 +178,55 @@ const Navbar = () => {
                 )}
               </div>
             ))}
+
+            {/* Admin Navigation */}
+            {user?.role === 'admin' && (
+              <div
+                className="relative"
+                onMouseEnter={() => handleDropdownEnter('Admin')}
+                onMouseLeave={handleDropdownLeave}
+              >
+                <button
+                  className={`flex items-center px-3 py-2 rounded-md text-sm transition-colors duration-200 ${
+                    activeDropdown === 'Admin'
+                      ? 'text-[var(--color-primary-500)]'
+                      : 'text-[var(--color-accent-600)] hover:text-[var(--color-primary-500)]'
+                  }`}
+                >
+                  Admin
+                  <Icon
+                    icon="mdi:chevron-down"
+                    className={`ml-1 w-4 h-4 transition-transform duration-200 ${
+                      activeDropdown === 'Admin' ? 'rotate-180' : ''
+                    }`}
+                  />
+                </button>
+                <div
+                  className={`absolute top-full left-0 mt-1 py-2 w-48 bg-[var(--color-accent-50)] rounded-lg shadow-lg transition-all duration-300 ${
+                    activeDropdown === 'Admin'
+                      ? 'opacity-100 visible translate-y-0'
+                      : 'opacity-0 invisible -translate-y-2'
+                  }`}
+                >
+                  {adminNavItems.map((item) => (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      className={`block px-4 py-2 text-sm ${
+                        isActive(item.path)
+                          ? 'text-[var(--color-primary-500)] bg-[var(--color-primary-50)]'
+                          : 'text-[var(--color-accent-600)] hover:text-[var(--color-primary-500)] hover:bg-[var(--color-primary-50)]'
+                      }`}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Auth Section - Moved to right side */}
+          {/* Auth Section */}
           <div className="hidden md:flex items-center justify-end w-48">
             {user ? (
               <div className="flex items-center space-x-3 group">

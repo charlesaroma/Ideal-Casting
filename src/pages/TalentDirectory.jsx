@@ -1,9 +1,10 @@
 import { useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 import TalentCard from '../components/talent/TalentCard';
 import { talents, talentCategories, skillsList } from '../data/sampleTalents';
 
-const TalentDirectory = () => {
+const TalentDirectory = ({ isAdmin }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedSkills, setSelectedSkills] = useState([]);
@@ -89,12 +90,31 @@ const TalentDirectory = () => {
     );
   };
 
+  // Admin Actions
+  const handleDeleteTalent = (talentId) => {
+    if (window.confirm('Are you sure you want to delete this talent?')) {
+      // Here you would typically make an API call to delete the talent
+      console.log('Deleting talent:', talentId);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[var(--color-accent-50)] pt-20">
       <div className="container-custom py-8">
-        {/* Header with Search */}
+        {/* Header with Search and Admin Controls */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-          <h1 className="text-4xl font-bold text-[var(--color-accent-900)]">Talent Directory</h1>
+          <div className="flex items-center gap-4">
+            <h1 className="text-4xl font-bold text-[var(--color-accent-900)]">Talent Directory</h1>
+            {isAdmin && (
+              <Link
+                to="/admin/add-talent"
+                className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors duration-200 flex items-center gap-2"
+              >
+                <Icon icon="mdi:plus" className="w-5 h-5" />
+                Add New Talent
+              </Link>
+            )}
+          </div>
           <div className="flex items-center gap-4 w-full md:w-auto">
             <div className="relative flex-1 md:w-80">
               <input
@@ -262,14 +282,36 @@ const TalentDirectory = () => {
           </div>
         )}
 
-        {/* Results Grid */}
+        {/* Results Grid with Admin Controls */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredTalents.map((talent) => (
-            <TalentCard key={talent.talentId} talent={{
-              ...talent,
-              skills: talent.skills.slice(0, 2),
-              moreSkills: talent.skills.length > 2 ? `+${talent.skills.length - 2} more` : ''
-            }} />
+            <div key={talent.talentId} className="relative group">
+              <TalentCard
+                talent={{
+                  ...talent,
+                  skills: talent.skills.slice(0, 2),
+                  moreSkills: talent.skills.length > 2 ? `+${talent.skills.length - 2} more` : ''
+                }}
+              />
+              {isAdmin && (
+                <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  <Link
+                    to={`/admin/edit-talent/${talent.talentId}`}
+                    className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors duration-200"
+                    title="Edit Talent"
+                  >
+                    <Icon icon="mdi:pencil" className="w-4 h-4" />
+                  </Link>
+                  <button
+                    onClick={() => handleDeleteTalent(talent.talentId)}
+                    className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors duration-200"
+                    title="Delete Talent"
+                  >
+                    <Icon icon="mdi:trash" className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+            </div>
           ))}
         </div>
 
@@ -286,6 +328,26 @@ const TalentDirectory = () => {
             <p className="text-[var(--color-accent-600)]">
               Try adjusting your filters or search terms
             </p>
+          </div>
+        )}
+
+        {/* Admin Quick Actions */}
+        {isAdmin && (
+          <div className="fixed bottom-6 right-6 flex flex-col gap-4">
+            <Link
+              to="/admin/manage-talents"
+              className="p-4 bg-[var(--color-primary-500)] text-white rounded-full hover:bg-[var(--color-primary-600)] transition-colors duration-200 shadow-lg"
+              title="Manage Talents"
+            >
+              <Icon icon="mdi:cog" className="w-6 h-6" />
+            </Link>
+            <Link
+              to="/admin/add-talent"
+              className="p-4 bg-green-500 text-white rounded-full hover:bg-green-600 transition-colors duration-200 shadow-lg"
+              title="Add New Talent"
+            >
+              <Icon icon="mdi:plus" className="w-6 h-6" />
+            </Link>
           </div>
         )}
       </div>

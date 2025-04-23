@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 
-const Login = ({ onLogin }) => {
+const AdminLogin = ({ onLogin }) => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
@@ -12,19 +12,20 @@ const Login = ({ onLogin }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Regular user login
-    const user = {
-      name: formData.email.split('@')[0],
-      email: formData.email,
-      role: 'user'
-    };
-    
-    // Save to localStorage and update state
-    localStorage.setItem('user', JSON.stringify(user));
-    await onLogin(user);
-    
-    // Force a page reload to ensure all components update
-    window.location.href = '/';
+    if (formData.email === 'admin@example.com' && formData.password === 'admin123') {
+      const adminUser = {
+        name: 'Admin User',
+        email: formData.email,
+        role: 'admin'
+      };
+      
+      localStorage.setItem('user', JSON.stringify(adminUser));
+      await onLogin(adminUser);
+      
+      window.location.href = '/admin';
+    } else {
+      alert('Invalid admin credentials');
+    }
   };
 
   return (
@@ -32,8 +33,11 @@ const Login = ({ onLogin }) => {
       <div className="container-custom py-8">
         <div className="max-w-md mx-auto">
           <div className="bg-white rounded-xl shadow-lg p-6">
-            <h1 className="text-2xl font-bold text-[var(--color-accent-900)] mb-6">
-              Login to Your Account
+            <div className="flex items-center justify-center mb-6">
+              <Icon icon="mdi:shield-lock" className="w-12 h-12 text-[var(--color-primary-500)]" />
+            </div>
+            <h1 className="text-2xl font-bold text-[var(--color-accent-900)] mb-6 text-center">
+              Admin Login
             </h1>
 
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -47,7 +51,7 @@ const Login = ({ onLogin }) => {
                   value={formData.email}
                   onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                   className="w-full p-2 border border-[var(--color-accent-200)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]"
-                  placeholder="Enter your email"
+                  placeholder="Enter admin email"
                 />
               </div>
 
@@ -61,38 +65,17 @@ const Login = ({ onLogin }) => {
                   value={formData.password}
                   onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
                   className="w-full p-2 border border-[var(--color-accent-200)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]"
-                  placeholder="Enter your password"
+                  placeholder="Enter admin password"
                 />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <Link
-                  to="/forgot-password"
-                  className="text-sm text-[var(--color-primary-500)] hover:text-[var(--color-primary-600)]"
-                >
-                  Forgot Password?
-                </Link>
               </div>
 
               <button
                 type="submit"
                 className="w-full py-2 px-4 bg-[var(--color-primary-500)] text-white rounded-lg hover:bg-[var(--color-primary-600)] transition-colors duration-200"
               >
-                Login
+                Login as Admin
               </button>
             </form>
-
-            <div className="mt-6 text-center">
-              <p className="text-[var(--color-accent-600)]">
-                Don't have an account?{' '}
-                <Link
-                  to="/signup"
-                  className="text-[var(--color-primary-500)] hover:text-[var(--color-primary-600)]"
-                >
-                  Sign up
-                </Link>
-              </p>
-            </div>
           </div>
         </div>
       </div>
@@ -100,4 +83,4 @@ const Login = ({ onLogin }) => {
   );
 };
 
-export default Login;
+export default AdminLogin; 
