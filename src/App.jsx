@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { subscribeToAuthChanges } from './firebase/auth';
 import { getDocument } from './firebase/firestore';
 import Navbar from './components/layout/Navbar';
@@ -23,10 +23,12 @@ import AddTalent from './pages/admin/AddTalent';
 import EditTalent from './pages/admin/EditTalent';
 import ManageTalents from './pages/admin/ManageTalents';
 import BookingRequests from './pages/admin/BookingRequests';
+import LoadingSpinner from './components/common/LoadingSpinner';
 
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [location, setLocation] = useState(null);
 
   useEffect(() => {
     // Subscribe to auth state changes
@@ -73,11 +75,12 @@ function App() {
 
   // Protected Route component for regular users
   const ProtectedRoute = ({ children }) => {
+    const location = useLocation();
     if (loading) {
       return <div>Loading...</div>;
     }
     if (!user) {
-      return <Navigate to="/login" />;
+      return <Navigate to="/login" state={{ from: location }} />;
     }
     return children;
   };
@@ -85,7 +88,7 @@ function App() {
   // Protected Route component for admin users
   const AdminRoute = ({ children }) => {
     if (loading) {
-      return <div>Loading...</div>;
+      return <LoadingSpinner text="Loading dashboard..." />;
     }
     if (!user || user.role !== 'admin') {
       return <Navigate to="/admin-login" />;
@@ -94,7 +97,11 @@ function App() {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex flex-col min-h-screen bg-[var(--color-accent-50)] justify-center items-center">
+        <LoadingSpinner text="Initializing application..." />
+      </div>
+    );
   }
 
   return (

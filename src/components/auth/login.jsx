@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../firebase/config';
@@ -7,12 +7,16 @@ import LoadingSpinner from '../common/LoadingSpinner';
 
 const Login = ({ onLogin }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Get the redirect path from location state or use talent-directory as fallback
+  const from = location.state?.from?.pathname || '/talent-directory';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,8 +25,8 @@ const Login = ({ onLogin }) => {
     
     try {
       await signInWithEmailAndPassword(auth, formData.email, formData.password);
-      // Show loading spinner and reload the page
-      window.location.reload();
+      // Navigate to previous page or talent directory after successful login
+      navigate(from, { replace: true });
     } catch (err) {
       setError(err.message);
       setIsLoading(false);

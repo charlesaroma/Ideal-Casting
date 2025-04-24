@@ -18,9 +18,14 @@ const AdminLogin = ({ onLogin }) => {
     setIsLoading(true);
 
     try {
+      // Sign in with Firebase Auth
       await signInWithEmailAndPassword(auth, email, password);
-      // Show loading spinner and reload the page
-      window.location.reload();
+      
+      // Add a slight delay to ensure Firebase auth state is propagated
+      // This ensures the user data is fully loaded before redirecting
+      setTimeout(() => {
+        navigate('/admin', { replace: true });
+      }, 1500);
     } catch (err) {
       setError(err.message);
       setIsLoading(false);

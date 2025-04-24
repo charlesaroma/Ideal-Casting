@@ -429,11 +429,11 @@ const AdminDashboard = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
               {recentTalents.map((talent) => (
                 <div key={talent.id} className="bg-white rounded-xl shadow-lg overflow-hidden">
-                  <div className="aspect-[4/3] relative">
+                  <div className="aspect-[4/3] relative bg-[var(--color-accent-100)]">
                     <img
-                      src={talent.imageUrl || '/placeholder-talent.jpg'}
+                      src={talent.profileImage || '/placeholder-talent.jpg'}
                       alt={talent.name}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain"
                     />
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
                       <span className={`px-2 py-1 text-xs font-medium rounded-full ${
