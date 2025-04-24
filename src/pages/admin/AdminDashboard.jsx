@@ -411,6 +411,29 @@ const AdminDashboard = () => {
             </div>
           </div>
 
+          {/* Admin Actions */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+            {adminActions.map((action) => (
+              <Link
+                key={action.title}
+                to={action.link}
+                className="block bg-white rounded-xl shadow-lg p-4 sm:p-6 hover:shadow-xl transition-shadow duration-200"
+              >
+                <div className="flex items-start gap-4">
+                  <div className={`p-2 sm:p-3 rounded-lg bg-${action.color}-50`}>
+                    <Icon icon={action.icon} className={`w-6 h-6 sm:w-8 sm:h-8 text-${action.color}-500`} />
+                  </div>
+                  <div>
+                    <h3 className="text-lg sm:text-xl font-semibold text-[var(--color-accent-900)] mb-1 sm:mb-2">
+                      {action.title}
+                    </h3>
+                    <p className="text-sm sm:text-base text-[var(--color-accent-600)]">{action.description}</p>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+
           {/* Talent Showcase */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
@@ -555,29 +578,6 @@ const AdminDashboard = () => {
                 </div>
               )}
             </div>
-          </div>
-
-          {/* Admin Actions */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {adminActions.map((action) => (
-              <Link
-                key={action.title}
-                to={action.link}
-                className="block bg-white rounded-xl shadow-lg p-4 sm:p-6 hover:shadow-xl transition-shadow duration-200"
-              >
-                <div className="flex items-start gap-4">
-                  <div className={`p-2 sm:p-3 rounded-lg bg-${action.color}-50`}>
-                    <Icon icon={action.icon} className={`w-6 h-6 sm:w-8 sm:h-8 text-${action.color}-500`} />
-                  </div>
-                  <div>
-                    <h3 className="text-lg sm:text-xl font-semibold text-[var(--color-accent-900)] mb-1 sm:mb-2">
-                      {action.title}
-                    </h3>
-                    <p className="text-sm sm:text-base text-[var(--color-accent-600)]">{action.description}</p>
-                  </div>
-                </div>
-              </Link>
-            ))}
           </div>
         </div>
       </div>
