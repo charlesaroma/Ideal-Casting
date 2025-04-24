@@ -164,13 +164,16 @@ Created: ${booking.createdAt ? booking.createdAt.toLocaleString() : 'Unknown'}
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className="w-full sm:w-auto px-3 sm:px-4 py-1.5 sm:py-2 border border-[var(--color-accent-200)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)] text-sm sm:text-base"
+              className="w-full sm:w-auto px-3 sm:px-4 py-2 sm:py-2.5 border border-[var(--color-accent-200)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)] text-sm sm:text-base bg-white appearance-none cursor-pointer hover:border-[var(--color-primary-500)] transition-colors duration-200"
             >
-              <option value="all">All Requests</option>
-              <option value="pending">Pending</option>
-              <option value="approved">Approved</option>
-              <option value="rejected">Rejected</option>
+              <option value="all" className="text-sm sm:text-base">All Requests</option>
+              <option value="pending" className="text-sm sm:text-base">Pending</option>
+              <option value="approved" className="text-sm sm:text-base">Approved</option>
+              <option value="rejected" className="text-sm sm:text-base">Rejected</option>
             </select>
+            <div className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+              <Icon icon="mdi:chevron-down" className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--color-accent-600)]" />
+            </div>
           </div>
         </div>
 
