@@ -1,45 +1,47 @@
 import { Link } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import { useState, useEffect } from "react";
-import { collection, onSnapshot, query, orderBy, limit } from "firebase/firestore";
+import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
 import { db } from "../firebase/config";
 
 const Home = () => {
   const [featuredTalents, setFeaturedTalents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Fetch top-rated talents from Firestore
-    const q = query(
-      collection(db, 'talents'),
-      orderBy('rating', 'desc'),
-      limit(3)
-    );
+    const fetchTalents = async () => {
+      try {
+        // First try to get data without authentication
+        const q = query(
+          collection(db, 'talents'),
+          orderBy('rating', 'desc'),
+          limit(3)
+        );
 
-    const unsubscribe = onSnapshot(q, 
-      (snapshot) => {
-        const talentsList = snapshot.docs.map(doc => ({
+        const querySnapshot = await getDocs(q);
+        const talentsList = querySnapshot.docs.map(doc => ({
           ...doc.data(),
           id: doc.id
         }));
-        
+
         // Sort talents to ensure ACT-003 appears last
         const sortedTalents = talentsList.sort((a, b) => {
           if (a.talentId === "ACT-003") return 1;
           if (b.talentId === "ACT-003") return -1;
           return 0;
         });
-        
+
         setFeaturedTalents(sortedTalents);
         setLoading(false);
-      },
-      (err) => {
+      } catch (err) {
         console.error('Error fetching talents:', err);
+        setError('Unable to load featured talents');
         setLoading(false);
       }
-    );
+    };
 
-    return () => unsubscribe();
+    fetchTalents();
   }, []);
 
   const features = [
@@ -82,13 +84,26 @@ const Home = () => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="flex flex-col min-h-screen bg-[var(--color-accent-50)]">
+        <div className="flex-grow flex items-center justify-center">
+          <div className="text-center">
+            <Icon icon="mdi:alert-circle" className="w-12 h-12 text-red-500 mx-auto mb-4" />
+            <p className="text-[var(--color-accent-900)]">{error}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-[var(--color-accent-50)]">
       <div className="flex-grow">
-      {/* Hero Section */}
+        {/* Hero Section */}
         <section className="relative min-h-[calc(100vh-80px)] flex items-center justify-center overflow-hidden py-12 sm:py-16 md:py-20 px-4 sm:px-8 md:px-12 lg:px-24">
           <div className="container-custom relative z-10">
-            <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center pt-16 sm:pt-20 lg:pt-0">
+            <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
               {/* Left Content */}
               <div className="text-center lg:text-left">
                 <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold mb-4 sm:mb-6">
@@ -136,7 +151,7 @@ const Home = () => {
                           <img
                             src={talent.profileImage}
                             alt={`${talent.primaryRole} Talent`}
-                            className="w-full h-[120%] object-cover object-center -translate-y-[10%]"
+                            className="w-full h-full object-cover object-center"
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-accent-900)]/60 to-transparent"></div>
                         </div>
@@ -181,7 +196,7 @@ const Home = () => {
                         <img
                           src={talent.profileImage}
                           alt={`${talent.primaryRole} Talent`}
-                          className="w-full object-cover object-center -translate-y-[10%]"
+                          className="w-full h-full object-contain"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-accent-900)]/60 to-transparent"></div>
                       </div>
@@ -206,6 +221,46 @@ const Home = () => {
                       </div>
                     </div>
                   ))}
+
+                  {/* Mobile/Tablet View */}
+                  <div className="block lg:hidden">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-2xl mx-auto">
+                      {featuredTalents.slice(0, 2).map((talent) => (
+                        <div
+                          key={talent.id}
+                          className="bg-[var(--color-accent-200)] rounded-2xl shadow-xl overflow-hidden"
+                        >
+                          <div className="relative aspect-[4/3] overflow-hidden">
+                            <img
+                              src={talent.profileImage}
+                              alt={`${talent.primaryRole} Talent`}
+                              className="w-full h-full object-cover object-center"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-accent-900)]/60 to-transparent"></div>
+                          </div>
+                          <div className="p-4">
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className={`w-2 h-2 rounded-full ${talent.availability === 'Available' ? 'bg-green-500' : 'bg-amber-500'}`}></div>
+                              <span className="text-sm text-[var(--color-accent-500)]">
+                                {talent.availability}
+                              </span>
+                            </div>
+                            <h3 className="text-lg font-semibold text-[var(--color-accent-900)]">
+                              {talent.name}
+                            </h3>
+                            <div className="flex items-center justify-between">
+                              <p className="text-sm text-[var(--color-accent-600)]">
+                                {talent.primaryRole}
+                              </p>
+                              <span className="text-xs px-2 py-1 bg-[var(--color-accent-100)] text-[var(--color-accent-700)] rounded-full">
+                                {talent.skills[0]}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
 
                   {/* Decorative Elements */}
                   <div className="absolute top-40 left-20 w-20 h-20 border-4 border-[var(--color-primary-500)] rounded-full opacity-20"></div>
