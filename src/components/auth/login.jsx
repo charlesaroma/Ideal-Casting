@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
-import { signIn } from '../../firebase/auth';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../../firebase/config';
+import LoadingSpinner from '../common/LoadingSpinner';
 
 const Login = ({ onLogin }) => {
   const navigate = useNavigate();
@@ -18,31 +20,18 @@ const Login = ({ onLogin }) => {
     setIsLoading(true);
     
     try {
-      const { user, error } = await signIn(formData.email, formData.password);
-      
-      if (error) {
-        setError(error);
-        return;
-      }
-
-      if (user) {
-        const userData = {
-          uid: user.uid,
-          email: user.email,
-          name: user.displayName || formData.email.split('@')[0],
-          role: 'user'
-        };
-        
-        localStorage.setItem('user', JSON.stringify(userData));
-        await onLogin(userData);
-        navigate('/');
-      }
+      await signInWithEmailAndPassword(auth, formData.email, formData.password);
+      // Show loading spinner and reload the page
+      window.location.reload();
     } catch (err) {
-      setError('Failed to sign in. Please try again.');
-    } finally {
+      setError(err.message);
       setIsLoading(false);
     }
   };
+
+  if (isLoading) {
+    return <LoadingSpinner text="Logging in..." />;
+  }
 
   return (
     <div className="min-h-screen bg-[var(--color-accent-50)] pt-20">

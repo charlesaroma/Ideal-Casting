@@ -3,6 +3,7 @@ import { Icon } from "@iconify/react";
 import { useState, useEffect } from "react";
 import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
 import { db } from "../firebase/config";
+import LoadingSpinner from "../components/common/LoadingSpinner";
 
 const Home = () => {
   const [featuredTalents, setFeaturedTalents] = useState([]);
@@ -72,16 +73,7 @@ const Home = () => {
   ];
 
   if (loading) {
-    return (
-      <div className="flex flex-col min-h-screen bg-[var(--color-accent-50)]">
-        <div className="flex-grow flex items-center justify-center">
-          <div className="flex items-center gap-2">
-            <Icon icon="mdi:loading" className="w-6 h-6 animate-spin text-[var(--color-primary-500)]" />
-            <span className="text-[var(--color-accent-900)]">Loading...</span>
-          </div>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner text="Loading featured talents..." />;
   }
 
   if (error) {

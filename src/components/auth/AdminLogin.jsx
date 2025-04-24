@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
-import { signIn } from '../../firebase/auth';
-import { getDocument } from '../../firebase/firestore';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../../firebase/config';
+import LoadingSpinner from '../common/LoadingSpinner';
 
 const AdminLogin = ({ onLogin }) => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  });
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -19,49 +18,18 @@ const AdminLogin = ({ onLogin }) => {
     setIsLoading(true);
 
     try {
-      // Sign in with Firebase Auth
-      const { user, error: signInError } = await signIn(formData.email, formData.password);
-      
-      if (signInError) {
-        setError(signInError);
-        return;
-      }
-
-      if (user) {
-        // Check if user is admin in Firestore
-        const { data: userData, error: userError } = await getDocument('users', user.uid);
-        
-        if (userError || !userData) {
-          setError('User not found');
-          return;
-        }
-
-        if (userData.role !== 'admin') {
-          setError('Unauthorized access. Admin privileges required.');
-          return;
-        }
-
-        // Create user object for authentication
-        const adminData = {
-          uid: user.uid,
-          name: userData.name,
-          email: user.email,
-          role: 'admin'
-        };
-
-        // Save to localStorage and update app state
-        localStorage.setItem('user', JSON.stringify(adminData));
-        onLogin(adminData);
-
-        // Redirect to admin dashboard
-        navigate('/admin');
-      }
+      await signInWithEmailAndPassword(auth, email, password);
+      // Show loading spinner and reload the page
+      window.location.reload();
     } catch (err) {
-      setError('An error occurred. Please try again.');
-    } finally {
+      setError(err.message);
       setIsLoading(false);
     }
   };
+
+  if (isLoading) {
+    return <LoadingSpinner text="Logging in..." />;
+  }
 
   return (
     <div className="min-h-screen bg-[var(--color-accent-50)] pt-20">
@@ -92,8 +60,8 @@ const AdminLogin = ({ onLogin }) => {
                   type="email"
                   name="email"
                   required
-                  value={formData.email}
-                  onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="w-full p-2 border border-[var(--color-accent-200)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]"
                   placeholder="Enter your email"
                 />
@@ -107,8 +75,8 @@ const AdminLogin = ({ onLogin }) => {
                   type="password"
                   name="password"
                   required
-                  value={formData.password}
-                  onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="w-full p-2 border border-[var(--color-accent-200)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]"
                   placeholder="Enter your password"
                 />
@@ -116,17 +84,9 @@ const AdminLogin = ({ onLogin }) => {
 
               <button
                 type="submit"
-                disabled={isLoading}
                 className="w-full py-2 px-4 bg-[var(--color-primary-500)] text-white rounded-lg hover:bg-[var(--color-primary-600)] transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                {isLoading ? (
-                  <>
-                    <Icon icon="mdi:loading" className="w-5 h-5 animate-spin" />
-                    Signing in...
-                  </>
-                ) : (
-                  'Sign In'
-                )}
+                Sign In
               </button>
 
               <div className="text-center text-sm text-[var(--color-accent-600)]">
