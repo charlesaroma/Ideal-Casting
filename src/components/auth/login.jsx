@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../firebase/config';
 import LoadingSpinner from '../common/LoadingSpinner';
 
-const Login = ({ onLogin }) => {
+const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [activeTab, setActiveTab] = useState('user'); // 'user' or 'talent'
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -15,8 +16,8 @@ const Login = ({ onLogin }) => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   
-  // Get the redirect path from location state or use talent-directory as fallback
-  const from = location.state?.from?.pathname || '/talent-directory';
+  // Get the redirect path from location state or use appropriate fallback based on role
+  const from = location.state?.from?.pathname || (activeTab === 'talent' ? '/talent-dashboard' : '/talent-directory');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,7 +26,7 @@ const Login = ({ onLogin }) => {
     
     try {
       await signInWithEmailAndPassword(auth, formData.email, formData.password);
-      // Navigate to previous page or talent directory after successful login
+      // Navigate to appropriate dashboard based on role
       navigate(from, { replace: true });
     } catch (err) {
       setError(err.message);
@@ -42,8 +43,33 @@ const Login = ({ onLogin }) => {
       <div className="container-custom py-8">
         <div className="max-w-md mx-auto">
           <div className="bg-white rounded-xl shadow-lg p-6">
-            <h1 className="text-2xl font-bold text-[var(--color-accent-900)] mb-6">
-              Login to Your Account
+            <div className="flex justify-center mb-6">
+              <div className="flex space-x-1 bg-[var(--color-accent-100)] p-1 rounded-lg">
+                <button
+                  onClick={() => setActiveTab('user')}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
+                    activeTab === 'user'
+                      ? 'bg-white text-[var(--color-primary-500)] shadow-sm'
+                      : 'text-[var(--color-accent-600)] hover:text-[var(--color-accent-900)]'
+                  }`}
+                >
+                  User Login
+                </button>
+                <button
+                  onClick={() => setActiveTab('talent')}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
+                    activeTab === 'talent'
+                      ? 'bg-white text-[var(--color-primary-500)] shadow-sm'
+                      : 'text-[var(--color-accent-600)] hover:text-[var(--color-accent-900)]'
+                  }`}
+                >
+                  Talent Login
+                </button>
+              </div>
+            </div>
+
+            <h1 className="text-2xl font-bold text-[var(--color-accent-900)] mb-6 text-center">
+              {activeTab === 'user' ? 'User Login' : 'Talent Login'}
             </h1>
 
             {error && (
@@ -110,7 +136,7 @@ const Login = ({ onLogin }) => {
               <p className="text-[var(--color-accent-600)]">
                 Don't have an account?{' '}
                 <Link
-                  to="/signup"
+                  to={activeTab === 'user' ? "/signup" : "/talent-signup"}
                   className="text-[var(--color-primary-500)] hover:text-[var(--color-primary-600)]"
                 >
                   Sign up
