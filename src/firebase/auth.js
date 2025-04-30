@@ -6,22 +6,24 @@ import {
 } from 'firebase/auth';
 import { auth } from './config';
 
-// Sign up function
+// Sign up a new user
 export const signUp = async (email, password) => {
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     return { user: userCredential.user, error: null };
   } catch (error) {
+    console.error('Error signing up:', error);
     return { user: null, error: error.message };
   }
 };
 
-// Sign in function
+// Sign in a user
 export const signIn = async (email, password) => {
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     return { user: userCredential.user, error: null };
   } catch (error) {
+    console.error('Error signing in:', error);
     return { user: null, error: error.message };
   }
 };

@@ -92,6 +92,12 @@ export const queryDocuments = async (collectionName, field, operator, value) => 
 // Talent specific functions
 export const createTalentWithAccount = async (talentData, accountData) => {
   try {
+    // Store current admin user before creating new account
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      throw new Error('You must be logged in as an admin to create talent accounts');
+    }
+
     // 1. Create Firebase Auth account
     const userCredential = await createUserWithEmailAndPassword(
       auth, 
@@ -99,6 +105,9 @@ export const createTalentWithAccount = async (talentData, accountData) => {
       accountData.password
     );
     const userId = userCredential.user.uid;
+
+    // Important: Sign back in as admin to prevent being logged out
+    await auth.updateCurrentUser(currentUser);
 
     // 2. Create talent profile document
     const talentProfile = {
@@ -123,12 +132,12 @@ export const createTalentWithAccount = async (talentData, accountData) => {
     };
     await setDoc(doc(db, 'users', userId), userData);
 
+    // Return data without the auth user to prevent automatic login
     return { 
       error: null, 
       data: {
         talent: talentProfile,
-        user: userData,
-        auth: userCredential.user
+        user: userData
       }
     };
   } catch (error) {

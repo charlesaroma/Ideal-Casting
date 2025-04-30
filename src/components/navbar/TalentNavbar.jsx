@@ -1,12 +1,37 @@
 // src/components/navbar/TalentNavbar.jsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 import { logOut } from '../../firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../../firebase/config';
+import LoadingSpinner from '../common/LoadingSpinner';
 
 const TalentNavbar = ({ user }) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [talentData, setTalentData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [imageError, setImageError] = useState(false);
+
+  useEffect(() => {
+    const fetchTalentData = async () => {
+      try {
+        if (user?.talentId) {
+          const talentDoc = await getDoc(doc(db, 'talents', user.talentId));
+          if (talentDoc.exists()) {
+            setTalentData(talentDoc.data());
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching talent data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTalentData();
+  }, [user]);
 
   const handleLogout = async () => {
     try {
@@ -15,6 +40,10 @@ const TalentNavbar = ({ user }) => {
     } catch (error) {
       console.error('Logout error:', error);
     }
+  };
+
+  const handleImageError = () => {
+    setImageError(true);
   };
 
   const navLinks = [
@@ -39,6 +68,18 @@ const TalentNavbar = ({ user }) => {
       icon: 'mdi:bell',
     },
   ];
+
+  if (loading) {
+    return (
+      <nav className="fixed top-0 left-0 right-0 bg-white shadow-md z-50">
+        <div className="container-custom">
+          <div className="flex items-center justify-between h-20">
+            <LoadingSpinner text="Loading..." />
+          </div>
+        </div>
+      </nav>
+    );
+  }
 
   return (
     <nav className="fixed top-0 left-0 right-0 bg-white shadow-md z-50">
@@ -72,13 +113,26 @@ const TalentNavbar = ({ user }) => {
           {/* User Menu */}
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
-              <img
-                src={user?.photoURL || '/default-avatar.png'}
-                alt={user?.displayName || 'User'}
-                className="w-8 h-8 rounded-full"
-              />
+              <div className="relative w-8 h-8">
+                {imageError || !talentData?.profileImage ? (
+                  <div className="w-full h-full rounded-full bg-[var(--color-accent-100)] flex items-center justify-center">
+                    <Icon 
+                      icon="mdi:account" 
+                      className="w-5 h-5 text-[var(--color-accent-400)]" 
+                    />
+                  </div>
+                ) : (
+                  <img
+                    src={talentData.profileImage}
+                    alt={user?.name || 'User'}
+                    className="w-full h-full rounded-full object-cover"
+                    onError={handleImageError}
+                    loading="lazy"
+                  />
+                )}
+              </div>
               <span className="text-[var(--color-accent-900)] font-medium">
-                {user?.displayName || user?.email}
+                {user?.name || user?.email}
               </span>
             </div>
             <button

@@ -1,12 +1,13 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 import TalentCard from '../components/talent/TalentCard';
 import { talentCategories, skillsList } from '../data/sampleTalents';
-import { collection, onSnapshot, query, deleteDoc, doc } from 'firebase/firestore';
+import { collection, onSnapshot, query, deleteDoc, doc, orderBy } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
 const TalentDirectory = ({ isAdmin }) => {
+  const location = useLocation();
   const [talents, setTalents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -21,10 +22,27 @@ const TalentDirectory = ({ isAdmin }) => {
     availability: '',
   });
   const [showFilters, setShowFilters] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+
+  // Check if we're coming from the add talent page
+  useEffect(() => {
+    if (location.state?.success) {
+      setSuccessMessage(location.state.success);
+      // Clear the success message after 5 seconds
+      const timer = setTimeout(() => {
+        setSuccessMessage('');
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [location]);
 
   // Fetch talents from Firestore
   useEffect(() => {
-    const q = query(collection(db, 'talents'));
+    // Query to get talents, ordered by creation date with newest first
+    const q = query(
+      collection(db, 'talents'),
+      orderBy('createdAt', 'desc')
+    );
     
     const unsubscribe = onSnapshot(q, 
       (snapshot) => {
@@ -155,6 +173,22 @@ const TalentDirectory = ({ isAdmin }) => {
   return (
     <div className="min-h-screen bg-[var(--color-accent-50)] pt-20">
       <div className="container-custom py-8">
+        {/* Success Message */}
+        {successMessage && (
+          <div className="mb-6 p-4 bg-green-100 border border-green-200 text-green-700 rounded-lg flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Icon icon="mdi:check-circle" className="w-5 h-5 text-green-500" />
+              <span>{successMessage}</span>
+            </div>
+            <button 
+              onClick={() => setSuccessMessage('')} 
+              className="text-green-500 hover:text-green-700"
+            >
+              <Icon icon="mdi:close" className="w-5 h-5" />
+            </button>
+          </div>
+        )}
+
         {/* Header with Search and Admin Controls */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
           <div className="flex items-center gap-4">

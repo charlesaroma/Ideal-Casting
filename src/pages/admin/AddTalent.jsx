@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 import { talentCategories, skillsList } from '../../data/sampleTalents';
-import { collection, doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase/config';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../firebase/config';
+import LoadingSpinner from '../../components/common/LoadingSpinner';
+import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 
 const AddTalent = () => {
   const navigate = useNavigate();
@@ -41,12 +43,33 @@ const AddTalent = () => {
     return imageUrlPattern.test(url);
   };
 
+  const checkTalentIdExists = async (talentId) => {
+    try {
+      const talentDoc = await getDoc(doc(db, 'talents', talentId));
+      return talentDoc.exists();
+    } catch (error) {
+      console.error('Error checking talent ID:', error);
+      return false;
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
 
     try {
+      // Validate required fields
+      if (!formData.talentId || !formData.name || !formData.email || !formData.password) {
+        throw new Error('Please fill in all required fields');
+      }
+
+      // Check if talent ID already exists
+      const talentExists = await checkTalentIdExists(formData.talentId);
+      if (talentExists) {
+        throw new Error('Talent ID already exists. Please choose a different one.');
+      }
+
       // Validate passwords match
       if (formData.password !== formData.confirmPassword) {
         throw new Error('Passwords do not match');
@@ -62,9 +85,38 @@ const AddTalent = () => {
         throw new Error('Please enter a valid image URL (jpg, jpeg, png, gif, or webp)');
       }
 
-      // Create talent account
+      // Get current admin user
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        throw new Error('You must be logged in as an admin to add talent');
+      }
+
+      // Create talent account but don't sign in
       const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
       const userId = userCredential.user.uid;
+      
+      // Important: Sign back in as admin to prevent being logged out
+      await auth.updateCurrentUser(currentUser);
+
+      // Create user document in Firestore
+      const userData = {
+        uid: userId,
+        name: formData.name,
+        email: formData.email,
+        role: 'talent',
+        talentId: formData.talentId,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        phoneNumber: '',
+        address: '',
+        profileImage: formData.profileImageUrl || 'https://via.placeholder.com/150',
+        bio: '',
+        interests: [],
+        lastLogin: new Date().toISOString()
+      };
+
+      // Create user document first
+      await setDoc(doc(db, 'users', userId), userData);
 
       // Create talent document in Firestore
       const talentData = {
@@ -77,34 +129,56 @@ const AddTalent = () => {
         experience: Number(formData.experience),
         availability: formData.availability,
         skills: formData.skills,
-        profileImage: formData.profileImageUrl,
+        profileImage: formData.profileImageUrl || 'https://via.placeholder.com/150',
         rating: 0,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         userId: userId, // Link to the auth account
         email: formData.email,
-        role: 'talent'
+        role: 'talent',
+        status: 'active'
       };
 
-      // Create talent profile in Firestore
-      await setDoc(doc(db, 'talents', formData.talentId), talentData, { merge: true });
+      // Then create talent document
+      await setDoc(doc(db, 'talents', formData.talentId), talentData);
 
-      // Create user document in users collection
-      await setDoc(doc(db, 'users', userId), {
-        uid: userId,
-        email: formData.email,
-        name: formData.name,
-        role: 'talent',
-        talentId: formData.talentId
+      // Reset form
+      setFormData({
+        name: '',
+        talentId: '',
+        primaryRole: '',
+        gender: '',
+        age: '',
+        location: '',
+        experience: '',
+        availability: 'Available',
+        skills: [],
+        profileImageUrl: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
       });
 
-      // Navigate to talent directory after successful addition
-      navigate('/talent-directory');
+      // Show success message and navigate
+      setIsLoading(false);
+      navigate('/talent-directory', { 
+        replace: true,
+        state: { success: `Talent ${formData.name} was added successfully!` }
+      });
     } catch (err) {
       console.error('Error adding talent:', err);
-      setError(err.message || 'Failed to add talent. Please try again.');
-    } finally {
-      setIsLoading(false);
+      // Handle specific Firebase errors
+      if (err.code === 'auth/email-already-in-use') {
+        setError('This email is already registered. Please use a different email.');
+      } else if (err.code === 'auth/invalid-email') {
+        setError('Please enter a valid email address.');
+      } else if (err.code === 'auth/weak-password') {
+        setError('Password is too weak. Please use a stronger password.');
+      } else if (err.code === 'permission-denied') {
+        setError('You do not have permission to perform this action. Please make sure you are logged in as an admin.');
+      } else {
+        setError(err.message || 'Failed to add talent. Please try again.');
+      }
     }
   };
 
@@ -116,6 +190,14 @@ const AddTalent = () => {
         : [...prev.skills, skill]
     }));
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[var(--color-accent-50)] pt-20 flex items-center justify-center">
+        <LoadingSpinner text="Adding talent..." />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[var(--color-accent-50)] pt-20">
@@ -146,7 +228,7 @@ const AddTalent = () => {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-[var(--color-accent-700)] mb-1">
-                    Full Name
+                    Full Name *
                   </label>
                   <input
                     type="text"
@@ -159,7 +241,7 @@ const AddTalent = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-[var(--color-accent-700)] mb-1">
-                    Talent ID
+                    Talent ID *
                   </label>
                   <input
                     type="text"
@@ -172,7 +254,7 @@ const AddTalent = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-[var(--color-accent-700)] mb-1">
-                    Email Address
+                    Email Address *
                   </label>
                   <input
                     type="email"
@@ -185,7 +267,7 @@ const AddTalent = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-[var(--color-accent-700)] mb-1">
-                    Password
+                    Password *
                   </label>
                   <input
                     type="password"
@@ -198,7 +280,7 @@ const AddTalent = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-[var(--color-accent-700)] mb-1">
-                    Confirm Password
+                    Confirm Password *
                   </label>
                   <input
                     type="password"
@@ -211,7 +293,7 @@ const AddTalent = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-[var(--color-accent-700)] mb-1">
-                    Primary Role
+                    Primary Role *
                   </label>
                   <select
                     required
@@ -235,7 +317,7 @@ const AddTalent = () => {
                   <div className="space-y-2">
                     <input
                       type="url"
-                      placeholder="Enter ImageKit URL"
+                      placeholder="Enter Image URL"
                       value={formData.profileImageUrl}
                       onChange={handleImageUrlChange}
                       className="w-full p-2 border border-[var(--color-accent-200)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]"
@@ -271,7 +353,7 @@ const AddTalent = () => {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-[var(--color-accent-700)] mb-1">
-                    Gender
+                    Gender *
                   </label>
                   <select
                     required
@@ -282,12 +364,13 @@ const AddTalent = () => {
                     <option value="">Select Gender</option>
                     <option value="Male">Male</option>
                     <option value="Female">Female</option>
+                    <option value="Other">Other</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-[var(--color-accent-700)] mb-1">
-                    Age
+                    Age *
                   </label>
                   <input
                     type="number"
@@ -302,7 +385,7 @@ const AddTalent = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-[var(--color-accent-700)] mb-1">
-                    Location
+                    Location *
                   </label>
                   <select
                     required
@@ -314,12 +397,18 @@ const AddTalent = () => {
                     <option value="Kampala">Kampala</option>
                     <option value="Entebbe">Entebbe</option>
                     <option value="Jinja">Jinja</option>
+                    <option value="Lira">Lira</option>
+                    <option value="Gulu">Gulu</option>
+                    <option value="Arua">Arua</option>
+                    <option value="Mbale">Mbale</option>
+                    <option value="Mbarara">Mbarara</option>
+                    <option value="Soroti">Soroti</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-[var(--color-accent-700)] mb-1">
-                    Experience (Years)
+                    Experience (Years) *
                   </label>
                   <input
                     type="number"
@@ -333,7 +422,7 @@ const AddTalent = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-[var(--color-accent-700)] mb-1">
-                    Availability
+                    Availability *
                   </label>
                   <select
                     required
@@ -348,7 +437,7 @@ const AddTalent = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-[var(--color-accent-700)] mb-1">
-                    Skills
+                    Skills *
                   </label>
                   <div className="grid grid-cols-2 gap-2">
                     {skillsList.map((skill) => (

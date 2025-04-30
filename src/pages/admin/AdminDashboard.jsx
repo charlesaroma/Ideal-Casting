@@ -5,6 +5,7 @@ import { signUp } from '../../firebase/auth';
 import { createDocument } from '../../firebase/firestore';
 import { collection, query, orderBy, limit, onSnapshot, where } from 'firebase/firestore';
 import { db } from '../../firebase/config';
+import { auth } from '../../firebase/config';
 
 const AdminDashboard = () => {
   const [showCreateAdmin, setShowCreateAdmin] = useState(false);
@@ -185,6 +186,12 @@ const AdminDashboard = () => {
     }
 
     try {
+      // Store current admin user before creating new account
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        throw new Error('You must be logged in as an admin to create another admin');
+      }
+
       // Create user in Firebase Auth
       const { user, error: signUpError } = await signUp(formData.email, formData.password);
       
@@ -196,6 +203,9 @@ const AdminDashboard = () => {
       }
 
       if (user) {
+        // Important: Sign back in as admin to prevent being logged out
+        await auth.updateCurrentUser(currentUser);
+
         // Create admin profile in Firestore
         const adminData = {
           uid: user.uid,

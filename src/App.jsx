@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'r
 import { subscribeToAuthChanges } from './firebase/auth';
 import { getDocument } from './firebase/firestore';
 import Navbar from './components/layout/Navbar';
+import TalentNavbar from './components/navbar/TalentNavbar';
 import Footer from './components/layout/Footer';
 import ScrollToTop from './components/utils/ScrollToTop';
 import Home from './pages/Home';
@@ -11,6 +12,7 @@ import Services from './pages/Services';
 import TalentDirectory from './pages/TalentDirectory';
 import TalentShowcase from './pages/TalentShowcase';
 import TalentProfile from './pages/TalentProfile';
+import TalentDashboard from './pages/talent/TalentDashboard';
 import Team from './pages/Team';
 import Careers from './pages/Careers';
 import Contact from './pages/Contact';
@@ -28,7 +30,6 @@ import LoadingSpinner from './components/common/LoadingSpinner';
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [location, setLocation] = useState(null);
 
   useEffect(() => {
     // Subscribe to auth state changes
@@ -108,7 +109,7 @@ function App() {
     <Router>
       <ScrollToTop />
       <div className="flex flex-col min-h-screen bg-accent-50">
-        <Navbar user={user} />
+        {user?.role === 'talent' ? <TalentNavbar user={user} /> : <Navbar />}
         <main className="flex-grow">
           <div>
             <Routes>
@@ -125,6 +126,14 @@ function App() {
               <Route path="/forgot-password" element={<ForgotPassword />} />
 
               {/* Protected User Routes */}
+              <Route 
+                path="/talent-dashboard" 
+                element={
+                  <ProtectedRoute>
+                    <TalentDashboard />
+                  </ProtectedRoute>
+                } 
+              />
               <Route 
                 path="/talent-directory" 
                 element={
