@@ -15,13 +15,33 @@ const TalentDashboard = () => {
   useEffect(() => {
     const loadTalentData = async () => {
       try {
+        console.log('Current user:', auth.currentUser); // Debug log
+
+        if (!auth.currentUser) {
+          console.log('No authenticated user found'); // Debug log
+          navigate('/login');
+          return;
+        }
+
         // Get user document
         const { data: userData } = await getDocument('users', auth.currentUser.uid);
-        if (!userData) throw new Error('User not found');
+        console.log('User data:', userData); // Debug log
+
+        if (!userData) {
+          throw new Error('User not found');
+        }
+
+        if (!userData.talentId) {
+          throw new Error('No talent ID associated with this user');
+        }
 
         // Get talent document using talentId from user data
         const { data: talentData } = await getDocument('talents', userData.talentId);
-        if (!talentData) throw new Error('Talent profile not found');
+        console.log('Talent data:', talentData); // Debug log
+
+        if (!talentData) {
+          throw new Error('Talent profile not found');
+        }
 
         setTalent(talentData);
       } catch (err) {
@@ -32,21 +52,36 @@ const TalentDashboard = () => {
       }
     };
 
-    if (auth.currentUser) {
-      loadTalentData();
-    } else {
-      navigate('/login');
-    }
+    loadTalentData();
   }, [navigate]);
 
-  if (loading) return <LoadingSpinner text="Loading dashboard..." />;
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner text="Loading dashboard..." />
+      </div>
+    );
+  }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[var(--color-accent-50)] pt-20">
+      <div className="min-h-screen bg-[var(--color-accent-50)]">
         <div className="container-custom py-8">
           <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg p-4">
-            {error}
+            <p className="font-medium">Error loading dashboard</p>
+            <p>{error}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!talent) {
+    return (
+      <div className="min-h-screen bg-[var(--color-accent-50)]">
+        <div className="container-custom py-8">
+          <div className="bg-yellow-50 border border-yellow-200 text-yellow-600 rounded-lg p-4">
+            No talent profile found. Please contact an administrator.
           </div>
         </div>
       </div>
@@ -54,7 +89,7 @@ const TalentDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--color-accent-50)] pt-20">
+    <div className="min-h-screen bg-[var(--color-accent-50)]">
       <div className="container-custom py-8">
         {/* Profile Overview */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
