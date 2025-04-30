@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
 import { db } from "../firebase/config";
 import LoadingSpinner from "../components/common/LoadingSpinner";
+import FAQHomeData from "../data/FAQHomeData";
+import FAQAccordion from "../components/common/FAQAccordion";
 
 const Home = () => {
   const [featuredTalents, setFeaturedTalents] = useState([]);
@@ -325,6 +327,14 @@ const Home = () => {
             </div>
           </div>
         </section>
+
+        {/* Frequently asked Questions */}
+        <div className="py-8 sm:py-12 md:py-16 lg:py-20 bg-[var(--color-accent-100)]">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-[var(--color-accent-600)] text-center mb-4 sm:mb-6 leading-tight">
+            Frequently Asked Questions
+          </h2>
+          <FAQAccordion data={FAQHomeData} />
+        </div>
       </div>
     </div>
   );
