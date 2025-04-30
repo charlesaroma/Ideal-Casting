@@ -4,6 +4,8 @@ import { Icon } from '@iconify/react';
 import { talentCategories, skillsList } from '../../data/sampleTalents';
 import { collection, doc, setDoc } from 'firebase/firestore';
 import { db } from '../../firebase/config';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../../firebase/config';
 
 const AddTalent = () => {
   const navigate = useNavigate();
@@ -18,6 +20,9 @@ const AddTalent = () => {
     availability: 'Available',
     skills: [],
     profileImageUrl: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -42,10 +47,24 @@ const AddTalent = () => {
     setError('');
 
     try {
+      // Validate passwords match
+      if (formData.password !== formData.confirmPassword) {
+        throw new Error('Passwords do not match');
+      }
+
+      // Validate password strength
+      if (formData.password.length < 6) {
+        throw new Error('Password must be at least 6 characters long');
+      }
+
       // Validate image URL if provided
       if (formData.profileImageUrl && !validateImageUrl(formData.profileImageUrl)) {
         throw new Error('Please enter a valid image URL (jpg, jpeg, png, gif, or webp)');
       }
+
+      // Create talent account
+      const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+      const userId = userCredential.user.uid;
 
       // Create talent document in Firestore
       const talentData = {
@@ -61,11 +80,23 @@ const AddTalent = () => {
         profileImage: formData.profileImageUrl,
         rating: 0,
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        userId: userId, // Link to the auth account
+        email: formData.email,
+        role: 'talent'
       };
 
-      // Use setDoc with merge option to ensure we don't overwrite existing data
+      // Create talent profile in Firestore
       await setDoc(doc(db, 'talents', formData.talentId), talentData, { merge: true });
+
+      // Create user document in users collection
+      await setDoc(doc(db, 'users', userId), {
+        uid: userId,
+        email: formData.email,
+        name: formData.name,
+        role: 'talent',
+        talentId: formData.talentId
+      });
 
       // Navigate to talent directory after successful addition
       navigate('/talent-directory');
@@ -135,6 +166,45 @@ const AddTalent = () => {
                     required
                     value={formData.talentId}
                     onChange={(e) => setFormData(prev => ({ ...prev, talentId: e.target.value }))}
+                    className="w-full p-2 border border-[var(--color-accent-200)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[var(--color-accent-700)] mb-1">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={formData.email}
+                    onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                    className="w-full p-2 border border-[var(--color-accent-200)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[var(--color-accent-700)] mb-1">
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    value={formData.password}
+                    onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+                    className="w-full p-2 border border-[var(--color-accent-200)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[var(--color-accent-700)] mb-1">
+                    Confirm Password
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    value={formData.confirmPassword}
+                    onChange={(e) => setFormData(prev => ({ ...prev, confirmPassword: e.target.value }))}
                     className="w-full p-2 border border-[var(--color-accent-200)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]"
                   />
                 </div>
@@ -249,45 +319,57 @@ const AddTalent = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-[var(--color-accent-700)] mb-1">
-                    Experience (years)
+                    Experience (Years)
                   </label>
                   <input
                     type="number"
                     required
                     min="0"
-                    max="50"
                     value={formData.experience}
                     onChange={(e) => setFormData(prev => ({ ...prev, experience: e.target.value }))}
                     className="w-full p-2 border border-[var(--color-accent-200)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]"
                   />
                 </div>
-              </div>
-            </div>
 
-            {/* Skills Section */}
-            <div className="mt-6">
-              <label className="block text-sm font-medium text-[var(--color-accent-700)] mb-2">
-                Skills
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {skillsList.map((skill) => (
-                  <button
-                    key={skill}
-                    type="button"
-                    onClick={() => handleSkillToggle(skill)}
-                    className={`px-3 py-1 rounded-full text-sm font-medium transition-colors duration-200 ${
-                      formData.skills.includes(skill)
-                        ? 'bg-[var(--color-primary-500)] text-white'
-                        : 'bg-[var(--color-accent-100)] text-[var(--color-accent-700)] hover:bg-[var(--color-accent-200)]'
-                    }`}
+                <div>
+                  <label className="block text-sm font-medium text-[var(--color-accent-700)] mb-1">
+                    Availability
+                  </label>
+                  <select
+                    required
+                    value={formData.availability}
+                    onChange={(e) => setFormData(prev => ({ ...prev, availability: e.target.value }))}
+                    className="w-full p-2 border border-[var(--color-accent-200)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]"
                   >
-                    {skill}
-                  </button>
-                ))}
+                    <option value="Available">Available</option>
+                    <option value="Not Available">Not Available</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[var(--color-accent-700)] mb-1">
+                    Skills
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {skillsList.map((skill) => (
+                      <button
+                        key={skill}
+                        type="button"
+                        onClick={() => handleSkillToggle(skill)}
+                        className={`p-2 rounded-lg text-sm ${
+                          formData.skills.includes(skill)
+                            ? 'bg-[var(--color-primary-500)] text-white'
+                            : 'bg-[var(--color-accent-100)] text-[var(--color-accent-700)] hover:bg-[var(--color-accent-200)]'
+                        }`}
+                      >
+                        {skill}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Submit Button */}
             <div className="mt-8 flex justify-end">
               <button
                 type="submit"
@@ -300,10 +382,7 @@ const AddTalent = () => {
                     Adding Talent...
                   </>
                 ) : (
-                  <>
-                    <Icon icon="mdi:plus" className="w-5 h-5" />
-                    Add Talent
-                  </>
+                  'Add Talent'
                 )}
               </button>
             </div>
